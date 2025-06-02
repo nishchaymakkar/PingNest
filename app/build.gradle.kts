@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.chatapp.chattrix"
+    namespace = "com.chatapp.pingnest"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.chatapp.chattrix"
+        applicationId = "com.chatapp.pingnest"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

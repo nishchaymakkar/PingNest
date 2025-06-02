@@ -1,4 +1,4 @@
-package com.chatapp.chattrix
+package com.chatapp.pingnest
 
 import org.junit.Test
 

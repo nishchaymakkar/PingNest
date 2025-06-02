@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Chattrix"
+rootProject.name = "PingNest"
 include(":app")
  
