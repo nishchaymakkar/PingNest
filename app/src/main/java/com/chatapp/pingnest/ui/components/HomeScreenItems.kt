@@ -1,22 +1,24 @@
 package com.chatapp.pingnest.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,10 +26,12 @@ import androidx.compose.ui.Alignment.Companion.CenterStart
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.chatapp.pingnest.R
+import com.chatapp.pingnest.data.models.Status
 
 @Composable
 fun DrawerItemHeader(text: String) {
@@ -47,25 +51,34 @@ fun DrawerItemHeader(text: String) {
 }
 @Composable
 fun DrawerHeader() {
-    Row(modifier = Modifier.padding(16.dp), verticalAlignment = CenterVertically) {
-        Icon(
-            painter = painterResource(R.drawable.ic_launcher_foreground),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primaryContainer,
-            modifier = Modifier.size(50.dp),
-        )
-        Text(
-            text = "PingNest",
-            fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.primaryContainer,
-            style = MaterialTheme.typography.titleLarge
-        )
-
+    Row(modifier = Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = CenterVertically) {
+        Row(verticalAlignment = CenterVertically) {
+            Icon(
+                painter = painterResource(R.drawable.ic_launcher_foreground),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.size(50.dp),
+            )
+            Text(
+                text = "PingNest",
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                style = MaterialTheme.typography.titleLarge
+            )
+        }
+        IconButton(
+            onClick = {}
+        ) {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = null
+            )
+        }
     }
 }
 
 @Composable
-fun ChatItem(text: String, selected: Boolean, onChatClicked: () -> Unit) {
+fun ChatItem(nickname: String, fullname: String, selected: Boolean, status: Status, onChatClicked: () -> Unit) {
     val background = if (selected) {
         Modifier.background(MaterialTheme.colorScheme.primaryContainer)
     } else {
@@ -73,37 +86,66 @@ fun ChatItem(text: String, selected: Boolean, onChatClicked: () -> Unit) {
     }
     Row(
         modifier = Modifier
-            .height(56.dp)
+            .height(72.dp)  // Increased height for better spacing
             .fillMaxWidth()
-            .padding(horizontal = 6.dp)
-            .clip(CircleShape)
-            .then(background)
+            .padding(horizontal = 12.dp, vertical = 4.dp)  // Added vertical padding
+            .clip(MaterialTheme.shapes.medium)  // Using medium shape instead of circle
+            .background(MaterialTheme.colorScheme.background)
+            .border(  // Added conditional border
+                width = 1.dp,
+                color = if (selected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
+                shape = MaterialTheme.shapes.medium
+            )
             .clickable(onClick = onChatClicked),
         verticalAlignment = CenterVertically,
     ) {
-        val iconTint = if (selected) {
-            MaterialTheme.colorScheme.onPrimaryContainer
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
+        Box {
+            ProfileIcon(
+                size = 48.dp,  // Slightly larger profile icon
+                name = fullname,
+                modifier = Modifier.padding(start = 12.dp)
+            )
+            // Enhanced status indicator
+            if (status == Status.ONLINE) {
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .offset(x = 52.dp, y = 4.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,  // Using theme color
+                            shape = CircleShape
+                        )
+                        .border(1.5.dp, MaterialTheme.colorScheme.surface, CircleShape)
+                )
+            }
         }
-        Icon(
-            imageVector = Icons.Default.AccountCircle,
-            tint = iconTint,
-            modifier = Modifier.size(50.dp)
-                .padding(start = 16.dp),
-            contentDescription = null,
-        )
-        Text(
-            text,
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (selected) {
-                MaterialTheme.colorScheme.onPrimaryContainer
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-            modifier = Modifier.padding(start = 12.dp),
-        )
+        Column(
+            modifier = Modifier
+                .padding(start = 16.dp, end = 12.dp)
+                .weight(1f)  // Take remaining space
+        ) {
+            Text(
+                text = fullname,
+                fontWeight = FontWeight.SemiBold,  // Slightly reduced weight
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (selected) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                },
+            )
+            Text(
+                text = "@" + nickname,
+                fontWeight = FontWeight.Normal,  // Lighter weight for secondary text
+                style = MaterialTheme.typography.bodyMedium,  // Slightly larger
+                color = if (selected) {
+                    MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+            )
+        }
     }
 }
 @Composable
