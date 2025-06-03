@@ -57,4 +57,13 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation (libs.androidx.foundation)// or latest stable
+    implementation("androidx.compose.material3:material3:1.4.0-alpha15")
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
+    implementation (libs.androidx.window)
+    implementation( libs.androidx.adaptive)
+    implementation (libs.androidx.adaptive.layout)
+    implementation (libs.androidx.adaptive.navigation)
+    implementation (libs.androidx.material3.window.size.class1)
+    implementation (libs.androidx.animation)
 }

@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -37,7 +37,7 @@ private fun HomeScreenPreview() {
     }
 }
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(modifier: Modifier = Modifier,onChatClicked:(Int)-> Unit = {}) {
     Scaffold { innerPadding ->
         Box(
             modifier = modifier
@@ -47,22 +47,24 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             Column (
                 modifier = Modifier.fillMaxSize(),
             ){
-            DrawerHeader()
+            DrawerHeader(modifier)
             //DividerItem()
             Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
             ) {
 
                 DrawerItemHeader(text = "Connected Users")
                 DividerItem()
                 LazyColumn {
-                    items(users){user->
+                    itemsIndexed (users){index,user->
                         ChatItem(
                             nickname = user.nickName,
                             fullname = user.fullName,
                             selected = false,
                             status = user.status,
-                            onChatClicked = { }
+                            onChatClicked = { onChatClicked(index) }
                         )
 
                     }
