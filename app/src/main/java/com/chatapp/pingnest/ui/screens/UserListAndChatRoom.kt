@@ -8,6 +8,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.VerticalDragHandle
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -27,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
+import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.ui.screens.chatroom.ChatRoom
 import com.chatapp.pingnest.ui.screens.homescreen.HomeScreen
 import kotlinx.coroutines.launch
@@ -36,6 +38,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun UserListAndChatRoom() {
     var selectedUserIndex: Int? by rememberSaveable { mutableStateOf(null) }
+    var selectedUser: User? by rememberSaveable { mutableStateOf(null) }
     val navigator = rememberListDetailPaneScaffoldNavigator<Nothing>()
     val scope = rememberCoroutineScope()
     val isListAndDetailVisible = navigator.scaffoldValue[ListDetailPaneScaffoldRole.Detail] == PaneAdaptedValue.Expanded
@@ -53,15 +56,19 @@ fun UserListAndChatRoom() {
                 directive = navigator.scaffoldDirective,
                 value = navigator.scaffoldValue,
                 listPane = {AnimatedPane {
-                    HomeScreen(onChatClicked = {
-                        selectedUserIndex = it
+                    HomeScreen(onChatClicked = { index, user ->
+                        selectedUser = user
+                        selectedUserIndex = index
                         scope.launch {
                             navigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
                         }
                     })
                 }},
-                detailPane = {AnimatedPane {
-                    ChatRoom()
+                detailPane = {
+                    AnimatedPane {
+                    ChatRoom(
+                        user = selectedUser ,
+                    )
                 }},
                 paneExpansionState = rememberPaneExpansionState(navigator.scaffoldValue),
                 paneExpansionDragHandle = { state->

@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.Surface
 import com.chatapp.pingnest.ui.screens.UserListAndChatRoom
 import com.chatapp.pingnest.ui.screens.homescreen.HomeScreen
 import com.chatapp.pingnest.ui.theme.PingNestTheme
@@ -19,7 +20,9 @@ class PingNestActivity : ComponentActivity() {
 //                    onDismiss = {  },
 //                    onEnter = { nickname, realName ->  }
 //                )
-                UserListAndChatRoom()
+                Surface {
+                    UserListAndChatRoom()
+                }
             }
         }
     }

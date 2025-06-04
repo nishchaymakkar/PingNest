@@ -37,7 +37,7 @@ private fun HomeScreenPreview() {
     }
 }
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier,onChatClicked:(Int)-> Unit = {}) {
+fun HomeScreen(modifier: Modifier = Modifier,onChatClicked:(Int, User)-> Unit = {_, _ -> }) {
     Scaffold { innerPadding ->
         Box(
             modifier = modifier
@@ -64,7 +64,7 @@ fun HomeScreen(modifier: Modifier = Modifier,onChatClicked:(Int)-> Unit = {}) {
                             fullname = user.fullName,
                             selected = false,
                             status = user.status,
-                            onChatClicked = { onChatClicked(index) }
+                            onChatClicked = { onChatClicked(index,user) }
                         )
 
                     }
