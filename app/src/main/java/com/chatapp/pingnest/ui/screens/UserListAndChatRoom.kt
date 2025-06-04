@@ -68,6 +68,11 @@ fun UserListAndChatRoom() {
                     AnimatedPane {
                     ChatRoom(
                         user = selectedUser ,
+                        onNavIconPressed = {
+                            scope.launch {
+                                navigator.navigateBack()
+                            }
+                        }
                     )
                 }},
                 paneExpansionState = rememberPaneExpansionState(navigator.scaffoldValue),

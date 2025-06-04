@@ -48,33 +48,6 @@ fun DrawerItemHeader(text: String) {
         )
     }
 }
-@Composable
-fun DrawerHeader(modifier: Modifier) {
-    Row(modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = CenterVertically) {
-        Row(verticalAlignment = CenterVertically) {
-            Icon(
-                painter = painterResource(R.drawable.ic_launcher_foreground),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.size(50.dp),
-            )
-            Text(
-                text = "PingNest",
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.primaryContainer,
-                style = MaterialTheme.typography.titleLarge
-            )
-        }
-        IconButton(
-            onClick = {}
-        ) {
-            Icon(
-                imageVector = Icons.Default.Settings,
-                contentDescription = null
-            )
-        }
-    }
-}
 
 @Composable
 fun ChatItem(nickname: String, fullname: String, selected: Boolean, status: Status, onChatClicked: () -> Unit) {
@@ -89,7 +62,7 @@ fun ChatItem(nickname: String, fullname: String, selected: Boolean, status: Stat
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 4.dp)  // Added vertical padding
             .clip(MaterialTheme.shapes.medium)  // Using medium shape instead of circle
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surface)
             .border(  // Added conditional border
                 width = 1.dp,
                 color = if (selected) MaterialTheme.colorScheme.primary

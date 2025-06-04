@@ -59,11 +59,11 @@ fun MessageTextField(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
-                focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer.copy(.6f),
-                unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer.copy(.6f),
-                cursorColor = MaterialTheme.colorScheme.secondaryContainer,
-                focusedTextColor = MaterialTheme.colorScheme.secondary,
-                unfocusedTextColor = MaterialTheme.colorScheme.secondary,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(.6f),
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(.6f),
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         )
         Spacer(modifier = Modifier.width(8.dp))
