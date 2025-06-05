@@ -28,8 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.ui.screens.chatroom.ChatRoom
 import com.chatapp.pingnest.ui.screens.homescreen.HomeScreen
@@ -40,15 +38,19 @@ import kotlinx.coroutines.launch
 @Composable
 fun UserListAndChatRoom() {
     var selectedUserIndex: Int? by rememberSaveable { mutableStateOf(null) }
+    /**
+     * selectedUser needs to be in viewModel otherwise it will make app crash
+     **/
     var selectedUser: User? by rememberSaveable { mutableStateOf(null) }
     val navigator = rememberListDetailPaneScaffoldNavigator<Nothing>()
     val scope = rememberCoroutineScope()
     val isListAndDetailVisible = navigator.scaffoldValue[ListDetailPaneScaffoldRole.Detail] == PaneAdaptedValue.Expanded
             && navigator.scaffoldValue[ListDetailPaneScaffoldRole.List] == PaneAdaptedValue.Expanded
-
     BackHandler(enabled = navigator.canNavigateBack()) {
         scope.launch {
             navigator.navigateBack()
+            selectedUser = null
+            selectedUserIndex = null
 
         }
     }
@@ -67,12 +69,14 @@ fun UserListAndChatRoom() {
                     })
                 }},
                 detailPane = {
+
                     AnimatedPane {
                     ChatRoom(
-                        user = selectedUser ,
+                        user = selectedUser,
                         onNavIconPressed = {
                             scope.launch {
                                 navigator.navigateBack()
+                                selectedUser = null
                             }
                         }
                     )

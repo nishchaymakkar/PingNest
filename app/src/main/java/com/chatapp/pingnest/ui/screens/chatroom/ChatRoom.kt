@@ -32,6 +32,8 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,6 +60,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -65,6 +68,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -100,6 +104,14 @@ fun ChatRoom(
                 modifier = Modifier,
                 onNavIconPressed = onNavIconPressed,
             )
+        },
+        bottomBar = {
+            MessageTextField(
+                modifier = Modifier.background(Color.Transparent)
+                    .padding(bottom = 8.dp),
+                text = "Nishchay Makkar",
+                onTextChange = {}
+            )
         }
     ) { innerPadding->
 
@@ -113,13 +125,7 @@ fun ChatRoom(
                 scrollState = rememberLazyListState(),
                 modifier = Modifier.fillMaxWidth().weight(1f)
             )
-            MessageTextField(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(bottom = 8.dp),
-                text = "Nishchay Makkar",
-                onTextChange = {}
-            )
+
         }
         }
 
@@ -213,19 +219,38 @@ private fun Messages(
                     DayHeader(dayString = currentDay)
 
                 }
-
-
+                Column {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp, horizontal = 8.dp),
                     horizontalArrangement = if (isUserMe) Arrangement.End else Arrangement.Start
                 ) {
+
                     ChatItemBubble(
                         message = message,
                         isUserMe = isUserMe,
                         authorClicked = {}
                     )
+
+                }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp, horizontal = 8.dp),
+                        horizontalArrangement = if (isUserMe) Arrangement.End else Arrangement.Start
+                    ) {
+                        Text(
+                            text = message.timestamp.toLocalDateStringForMessage(),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = LocalContentColor.current,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    }
+
+
+
+
                 }
 
             }
@@ -302,19 +327,24 @@ fun ChatItemBubble(message: ChatMessage, isUserMe: Boolean, authorClicked: (Stri
 
 
 
-    Column {
+    Card(
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 5.dp
+        ),
+        shape = chatBubbleShape
+    ) {
         Surface(
             color = backgroundBubbleColor,
             shape = chatBubbleShape,
         ) {
             Column {
 
-
                 ClickableMessage(
                     message = message,
                     isUserMe = isUserMe,
                     authorClicked = authorClicked,
                 )
+
 
             }
         }
@@ -335,6 +365,7 @@ fun ChatItemBubble(message: ChatMessage, isUserMe: Boolean, authorClicked: (Stri
 //            }
 //        }
     }
+
 }
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
@@ -377,6 +408,7 @@ fun ClickableMessage( message: ChatMessage, isUserMe: Boolean, authorClicked: (S
         maxLines = Int.MAX_VALUE,
         overflow = TextOverflow.Clip
     )
+
 }
 
 
@@ -444,7 +476,7 @@ fun Date.toLocalDateString(): String {
     return formatter.format(this)
 }
 fun Date.toLocalDateStringForMessage(): String {
-    val formatter = SimpleDateFormat("hh mm", Locale.getDefault())
+    val formatter = SimpleDateFormat("hh:mm", Locale.getDefault())
     return formatter.format(this)
 }
 
