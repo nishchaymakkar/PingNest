@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,25 +35,18 @@ import com.chatapp.pingnest.ui.components.ChatItem
 import com.chatapp.pingnest.ui.components.DividerItem
 import com.chatapp.pingnest.ui.components.DrawerItemHeader
 import com.chatapp.pingnest.ui.theme.PingNestTheme
-val users = listOf(
-    User(nickName = "skywalker", fullName = "Luke Skywalker", status = Status.ONLINE),
-    User(nickName = "darthvader", fullName = "Anakin Skywalker", status = Status.OFFLINE),
-    User(nickName = "leia", fullName = "Leia Organa", status = Status.ONLINE),
-    User(nickName = "han_solo", fullName = "Han Solo", status = Status.OFFLINE),
-    User(nickName = "yoda", fullName = "Master Yoda", status = Status.ONLINE),
-    User(nickName = "obiwan", fullName = "Obi-Wan Kenobi", status = Status.OFFLINE),
-    User(nickName = "chewie", fullName = "Chewbacca", status = Status.ONLINE)
-)
 
 @Preview(apiLevel = 34)
 @Composable
 private fun HomeScreenPreview() {
     PingNestTheme {
-        HomeScreen()
+//        HomeScreen()
     }
 }
 @Composable
 fun HomeScreen(
+    isLoading: Boolean,
+    users: List<User>,
     modifier: Modifier = Modifier,
     onChatClicked:(Int, User)-> Unit = {_, _ -> }) {
     Scaffold (
@@ -82,15 +76,24 @@ fun HomeScreen(
                 DrawerItemHeader(text = "Connected Users")
                 DividerItem()
                 LazyColumn {
-                    itemsIndexed (users){index,user->
-                        ChatItem(
-                            nickname = user.nickName,
-                            fullname = user.fullName,
-                            selected = false,
-                            status = user.status,
-                            onChatClicked = { onChatClicked(index,user) }
-                        )
-
+                    if (isLoading){
+                        item {
+                            CircularProgressIndicator()
+                        }
+                    } else if (users.isEmpty()){
+                        item{
+                            Text("No connected user found")
+                        }
+                    } else {
+                        itemsIndexed (users) { index, user ->
+                            ChatItem(
+                                nickname = user.nickName,
+                                fullname = user.fullName,
+                                selected = false,
+                                status = user.status,
+                                onChatClicked = { onChatClicked(index, user) }
+                            )
+                        }
                     }
                 }
 

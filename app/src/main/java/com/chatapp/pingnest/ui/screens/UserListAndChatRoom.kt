@@ -28,7 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chatapp.pingnest.data.models.User
+import com.chatapp.pingnest.ui.PingNestViewModel
 import com.chatapp.pingnest.ui.screens.chatroom.ChatRoom
 import com.chatapp.pingnest.ui.screens.homescreen.HomeScreen
 import kotlinx.coroutines.launch
@@ -36,7 +38,11 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable
-fun UserListAndChatRoom() {
+fun UserListAndChatRoom(
+    viewModel: PingNestViewModel
+) {
+    val users by viewModel.users.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     var selectedUserIndex: Int? by rememberSaveable { mutableStateOf(null) }
     /**
      * selectedUser needs to be in viewModel otherwise it will make app crash
@@ -59,28 +65,35 @@ fun UserListAndChatRoom() {
             ListDetailPaneScaffold(
                 directive = navigator.scaffoldDirective,
                 value = navigator.scaffoldValue,
-                listPane = {AnimatedPane {
-                    HomeScreen(onChatClicked = { index, user ->
-                        selectedUser = user
-                        selectedUserIndex = index
-                        scope.launch {
-                            navigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
-                        }
-                    })
-                }},
-                detailPane = {
-
+                listPane = {
                     AnimatedPane {
-                    ChatRoom(
-                        user = selectedUser,
-                        onNavIconPressed = {
-                            scope.launch {
-                                navigator.navigateBack()
-                                selectedUser = null
+                        HomeScreen(
+                            isLoading = isLoading,
+                            users = users,
+                            onChatClicked = { index, user ->
+                                selectedUser = user
+                                selectedUserIndex = index
+                                scope.launch {
+                                    navigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
+                                }
                             }
-                        }
-                    )
-                }},
+
+                        )
+                    }
+                },
+                detailPane = {
+                    AnimatedPane {
+                        ChatRoom(
+                            user = selectedUser,
+                            onNavIconPressed = {
+                                scope.launch {
+                                    navigator.navigateBack()
+                                    selectedUser = null
+                                }
+                            }
+                        )
+                    }
+                },
                 paneExpansionState = rememberPaneExpansionState(navigator.scaffoldValue),
                 paneExpansionDragHandle = { state->
                     val interactionSource = remember { MutableInteractionSource() }
