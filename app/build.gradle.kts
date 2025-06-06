@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
+
 }
 
 android {
@@ -58,6 +60,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation (libs.androidx.foundation)// or latest stable
+    implementation(libs.lifecycle.viewmodel.compose)
     implementation("androidx.compose.material3:material3:1.4.0-alpha15")
     implementation("androidx.compose.material:material-icons-extended:1.6.0")
     implementation (libs.androidx.window)
@@ -66,4 +69,21 @@ dependencies {
     implementation (libs.androidx.adaptive.navigation)
     implementation (libs.androidx.material3.window.size.class1)
     implementation (libs.androidx.animation)
+
+    //serialization
+    implementation(libs.kotlinx.serialization.json)
+
+    //koin
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+
+
+    //ktor
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.websockets)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+
 }
