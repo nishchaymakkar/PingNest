@@ -1,6 +1,7 @@
 package com.chatapp.pingnest.data.network
 
 import android.util.Log
+import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.data.models.dto.ChatMessageDto
 import com.chatapp.pingnest.data.models.dto.UserDto
 
@@ -15,6 +16,7 @@ import io.ktor.websocket.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.serialization.json.Json
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 
@@ -78,8 +80,17 @@ class KtorStompMessagingClient(
         session?.send(Frame.Text("SUBSCRIBE\ndestination:$destination\nid:${destination.hashCode()}\n\n\u0000"))
     }
 
-    override suspend fun send( message: ChatMessageDto) {
-        val frame = "SEND\ndestination:queue/messages\ncontent-type:application/json\n\n$message\u0000"
+    override suspend fun addUser(
+        destination: String,
+        user: UserDto
+    ) {
+        val json = Json.encodeToString(user)
+        val frame = "SEND\ndestination:$destination\ncontent-type:application/json\n\n$json\u0000"
+        session?.send(Frame.Text(frame))
+    }
+
+    override suspend fun sendMessage(message: ChatMessageDto) {
+        val frame = "SEND\ndestination:/queue/messages\ncontent-type:application/json\n\n$message\u0000"
         session?.send(Frame.Text(frame))
     }
 
@@ -90,6 +101,7 @@ class KtorStompMessagingClient(
         session?.send(Frame.Text("DISCONNECT\n\n\u0000"))
         session?.close()
         client.close()
+
     }
 
 
