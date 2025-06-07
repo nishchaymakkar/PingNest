@@ -28,3 +28,9 @@ fun ChatMessage.toChatMessageDto(): ChatMessageDto = ChatMessageDto(
     timestamp = this.timestamp,
     chatId = this.chatId
 )
+
+fun User.toUserDto(): UserDto = UserDto(
+    nickName = this.nickName,
+    fullName = this.fullName,
+    status = this.status
+)

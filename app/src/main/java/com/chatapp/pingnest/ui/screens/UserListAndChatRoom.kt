@@ -85,6 +85,7 @@ fun UserListAndChatRoom(
                     AnimatedPane {
                         ChatRoom(
                             user = selectedUser,
+                            messages = emptyList(),
                             onNavIconPressed = {
                                 scope.launch {
                                     navigator.navigateBack()

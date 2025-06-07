@@ -1,5 +1,8 @@
 package com.chatapp.pingnest.ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chatapp.pingnest.data.models.ChatMessage
@@ -8,6 +11,7 @@ import com.chatapp.pingnest.data.network.RealtimeMessagingClient
 import com.chatapp.pingnest.ui.mappers.toChatMessage
 import com.chatapp.pingnest.ui.mappers.toChatMessageDto
 import com.chatapp.pingnest.ui.mappers.toUser
+import com.chatapp.pingnest.ui.mappers.toUserDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +26,8 @@ import org.koin.dsl.module
 class PingNestViewModel(
     private val messagingClient: RealtimeMessagingClient
 ): ViewModel() {
+    var state by mutableStateOf(UserState())
+        private set
     private val _users = MutableStateFlow<List<User>>(emptyList())
     val users: StateFlow<List<User>> = _users.asStateFlow()
 
@@ -37,6 +43,16 @@ class PingNestViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = false
         )
+    fun onNicknameChange(nickname: String){
+        state = state.copy(
+            nickname = nickname
+        )
+    }
+    fun onRealNameChange(realName: String){
+        state = state.copy(
+            fullname = realName
+        )
+    }
 
     fun getUsers(){
         viewModelScope.launch {
@@ -67,9 +83,17 @@ class PingNestViewModel(
             messagingClient.subscribe(destination)
         }
     }
-    fun send(destination: String, message: ChatMessage){
+    fun addUser(destination: String, user: User){
+        state = state.copy(
+            isConnecting = false
+        )
         viewModelScope.launch {
-            messagingClient.send( message.toChatMessageDto())
+            messagingClient.addUser(destination, user.toUserDto())
+        }
+    }
+    fun send(message: ChatMessage){
+        viewModelScope.launch {
+            messagingClient.sendMessage( message.toChatMessageDto())
 
         }
     }

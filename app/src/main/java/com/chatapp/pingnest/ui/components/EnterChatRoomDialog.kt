@@ -1,3 +1,4 @@
+import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -9,16 +10,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 
-@Preview(
-    apiLevel = 33,
-)
+
 @Composable
 fun EnterChatRoomDialog(
     onDismiss: () -> Unit = {},
-    onEnter: (nickname: String, realName: String) -> Unit = { _, _ -> }
+    nickname: String,
+    fullname: String,
+    onNicknameChange: (String) -> Unit = {},
+    onRealNameChange: (String) -> Unit = {},
+    onEnter: () -> Unit = {}
 ) {
-    var nickname by remember { mutableStateOf("") }
-    var realName by remember { mutableStateOf("") }
+
 
     AlertDialog(
         containerColor = MaterialTheme.colorScheme.background,
@@ -38,15 +40,15 @@ fun EnterChatRoomDialog(
                     style = MaterialTheme.typography.titleLarge)
                 OutlinedTextField(
                     value = nickname,
-                    onValueChange = { nickname = it },
+                    onValueChange = onNicknameChange,
                     label = { Text("Nickname") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 
                 OutlinedTextField(
-                    value = realName,
-                    onValueChange = { realName = it },
+                    value = fullname,
+                    onValueChange = onRealNameChange,
                     label = { Text("Real Name") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -55,7 +57,7 @@ fun EnterChatRoomDialog(
         },
         confirmButton = {
             Button(
-                onClick = { onEnter(nickname, realName) },
+                onClick = onEnter,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
