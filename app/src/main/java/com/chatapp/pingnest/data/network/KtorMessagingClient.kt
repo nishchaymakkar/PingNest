@@ -1,5 +1,6 @@
 package com.chatapp.pingnest.data.network
 
+import android.util.Log
 import com.chatapp.pingnest.data.models.dto.ChatMessageDto
 import com.chatapp.pingnest.data.models.dto.UserDto
 
@@ -7,14 +8,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.request.*
 import io.ktor.client.plugins.websocket.webSocketSession
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.filterIsInstance
+import java.net.ConnectException
+import java.net.SocketTimeoutException
 
-
+val localhost = "192.168.1.254"
 class KtorStompMessagingClient(
     private val client: HttpClient
 ): RealtimeMessagingClient{
@@ -23,19 +27,40 @@ class KtorStompMessagingClient(
     private val incomingMessages = MutableSharedFlow<String>()
 
     override suspend fun getUsers(): List<UserDto> {
-        return client.get("http://localhost:8080/users").body()
+        return try {
+            client.get("http://$localhost:8088/users").body()
+        }catch (e: HttpRequestTimeoutException) {
+            Log.e("Network", "Timeout occurred: ${e.message}")
+            emptyList() // or handle accordingly
+        } catch (e: ConnectException) {
+            Log.e("Network", "Server unreachable: ${e.message}")
+            emptyList()
+        } catch (e: SocketTimeoutException) {
+            Log.e("Network", "Socket timeout: ${e.message}")
+            emptyList()
+        } catch (e: Exception) {
+            Log.e("Network", "Unexpected error: ${e.message}")
+            emptyList()
+        }
     }
 
     override suspend fun getMessages(
         senderId: String,
         recipientId: String
     ): List<ChatMessageDto> {
-        return client.get("http://localhost:8080/messages/$senderId/$recipientId").body()
+        return client.get("http://$localhost:8088/messages/$senderId/$recipientId").body()
     }
 
     override suspend fun connect() {
         session = client.webSocketSession {
-            url("ws://localhost:8080/ws")
+            url("ws://$localhost:8088/ws")
+        }
+        session?.let {
+            if (it.isActive){
+                println("Session Active")
+            } else{
+                println("Session Closed")
+            }
         }
         session?.send(Frame.Text("CONNECT\naccept-version:1.2\n\n\u0000"))
 
@@ -53,8 +78,8 @@ class KtorStompMessagingClient(
         session?.send(Frame.Text("SUBSCRIBE\ndestination:$destination\nid:${destination.hashCode()}\n\n\u0000"))
     }
 
-    override suspend fun send(destination: String, message: String) {
-        val frame = "SEND\ndestination:$destination\ncontent-type:application/json\n\n$message\u0000"
+    override suspend fun send( message: ChatMessageDto) {
+        val frame = "SEND\ndestination:queue/messages\ncontent-type:application/json\n\n$message\u0000"
         session?.send(Frame.Text(frame))
     }
 
