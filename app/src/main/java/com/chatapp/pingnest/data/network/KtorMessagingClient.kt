@@ -50,7 +50,21 @@ class KtorStompMessagingClient(
         senderId: String,
         recipientId: String
     ): List<ChatMessageDto> {
-        return client.get("http://$localhost:8088/messages/$senderId/$recipientId").body()
+        return try {
+            client.get("http://$localhost:8088/messages/$senderId/$recipientId").body()
+        }catch (e: HttpRequestTimeoutException) {
+            Log.e("Network", "Timeout occurred while fetching messages: ${e.message}")
+            emptyList() // or handle accordingly
+        } catch (e: ConnectException) {
+            Log.e("Network", "Server unreachable while fetching messages: ${e.message}")
+            emptyList()
+        } catch (e: SocketTimeoutException) {
+            Log.e("Network", "Socket timeout while fetching messages: ${e.message}")
+            emptyList()
+        } catch (e: Exception) {
+            Log.e("Network", "Unexpected error while fetching messages: ${e.message}")
+            emptyList()
+        }
     }
 
     override suspend fun connect() {
@@ -89,8 +103,9 @@ class KtorStompMessagingClient(
         session?.send(Frame.Text(frame))
     }
 
-    override suspend fun sendMessage(message: ChatMessageDto) {
-        val frame = "SEND\ndestination:/queue/messages\ncontent-type:application/json\n\n$message\u0000"
+    override suspend fun sendMessage(receipientId: String,message: ChatMessageDto) {
+        val json = Json.encodeToString(message)
+        val frame = "SEND\ndestination:/app/chat\ncontent-type:application/json\n\n$json\u0000"
         session?.send(Frame.Text(frame))
     }
 
