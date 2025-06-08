@@ -1,10 +1,12 @@
 package com.chatapp.pingnest.ui
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chatapp.pingnest.data.local.DataStoreRepository
 import com.chatapp.pingnest.data.models.ChatMessage
 import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.data.network.RealtimeMessagingClient
@@ -23,11 +25,18 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
+
 class PingNestViewModel(
-    private val messagingClient: RealtimeMessagingClient
+    private val messagingClient: RealtimeMessagingClient,
+    private val dataStoreRepository: DataStoreRepository
 ): ViewModel() {
     var state by mutableStateOf(UserState())
         private set
+    var message by mutableStateOf<String>("")
+        private set
+    private val _user = mutableStateOf<User?>(null)
+    val user: State<User?> = _user
+
     private val _users = MutableStateFlow<List<User>>(emptyList())
     val users: StateFlow<List<User>> = _users.asStateFlow()
 
@@ -43,6 +52,34 @@ class PingNestViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = false
         )
+
+    val isUserPresent = dataStoreRepository.currentUser()
+        .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = UserState()
+    )
+    fun setUser(newUser: User) {
+        _user.value = newUser
+    }
+    fun removeUser(){
+        _user.value = null
+    }
+    fun userPresent() {
+        viewModelScope.launch {
+            state = state.copy(
+                isConnecting = false
+            )
+        }
+    }
+    fun saveUserLocally(fullName: String, nickname: String){
+        viewModelScope.launch {
+            dataStoreRepository.saveUser(fullName, nickname)
+        }
+    }
+    fun onMessageChange(message: String){
+        this.message = message
+    }
     fun onNicknameChange(nickname: String){
         state = state.copy(
             nickname = nickname
@@ -83,6 +120,7 @@ class PingNestViewModel(
             messagingClient.subscribe(destination)
         }
     }
+
     fun addUser(destination: String, user: User){
         state = state.copy(
             isConnecting = false
@@ -91,24 +129,24 @@ class PingNestViewModel(
             messagingClient.addUser(destination, user.toUserDto())
         }
     }
-    fun send(message: ChatMessage){
+    fun send(recipientId: String,message: ChatMessage){
         viewModelScope.launch {
-            messagingClient.sendMessage( message.toChatMessageDto())
+            messagingClient.sendMessage( recipientId,message.toChatMessageDto())
 
         }
     }
-    fun observeMessages(){
-        viewModelScope.launch {
-            messagingClient.observeMessages().collect{ message ->
-                _messages.value = messages.value.map { it.copy(content = message) }
-            }
-        }
-    }
+//    fun observeMessages(){
+//        viewModelScope.launch {
+//            messagingClient.observeMessages().collect{ message ->
+//                _messages.value = messages.value.map { it.copy(content = message) }
+//            }
+//        }
+//    }
 
 
 }
 
 val viewModelModule = module {
-    viewModel { PingNestViewModel(get()) }
+    viewModel { PingNestViewModel(get(),get()) }
 
 }

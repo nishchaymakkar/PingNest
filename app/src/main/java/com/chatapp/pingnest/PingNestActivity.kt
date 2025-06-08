@@ -6,13 +6,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chatapp.pingnest.data.models.Status
 import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.ui.PingNestViewModel
 import com.chatapp.pingnest.ui.screens.UserListAndChatRoom
-import com.chatapp.pingnest.ui.screens.homescreen.HomeScreen
 import com.chatapp.pingnest.ui.theme.PingNestTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -25,6 +25,7 @@ class PingNestActivity : ComponentActivity() {
             val viewModel = koinViewModel<PingNestViewModel>()
 
             val state = viewModel.state
+            val isUserPresent by viewModel.isUserPresent.collectAsStateWithLifecycle()
             LaunchedEffect(
                 Unit
             ) {
@@ -32,6 +33,7 @@ class PingNestActivity : ComponentActivity() {
             }
             PingNestTheme {
                 Surface {
+
                 if (state.isConnecting){
                     EnterChatRoomDialog(
                     onDismiss = {  },
@@ -40,6 +42,11 @@ class PingNestActivity : ComponentActivity() {
                     onNicknameChange = { viewModel.onNicknameChange(it) },
                     onRealNameChange = { viewModel.onRealNameChange(it) },
                     onEnter = {
+
+
+                        viewModel.saveUserLocally(fullName = state.fullname, nickname = state.nickname)
+
+
                         viewModel.addUser(
                             destination = "/app/user.addUser",
                             user = User(
@@ -48,7 +55,7 @@ class PingNestActivity : ComponentActivity() {
                                 status = Status.ONLINE
                             )
                         )
-                        viewModel.subscribe("/user/queue/messages")
+                        viewModel.subscribe("/topic/user")
 
 
                     }

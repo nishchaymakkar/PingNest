@@ -5,7 +5,6 @@ package com.chatapp.pingnest.ui.screens.chatroom
 import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -18,24 +17,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -47,7 +42,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
@@ -59,14 +53,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -85,14 +75,18 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
-import java.util.UUID
 
 
 @Composable
 fun ChatRoom(
     modifier: Modifier = Modifier,
     user: User?,
-    onNavIconPressed: () -> Unit
+    sender: String,
+    messages: List<ChatMessage>,
+    onNavIconPressed: () -> Unit,
+    onSend: ()-> Unit,
+    message: String,
+    onMessageChange: (String) -> Unit
 ) {
 
     if(user != null){
@@ -107,10 +101,12 @@ fun ChatRoom(
         },
         bottomBar = {
             MessageTextField(
-                modifier = Modifier.background(Color.Transparent)
+                modifier = Modifier
+                    .background(Color.Transparent)
                     .padding(bottom = 8.dp),
-                text = "Nishchay Makkar",
-                onTextChange = {}
+                text = message,
+                onTextChange = onMessageChange,
+                onSendMessage = { onSend() }
             )
         }
     ) { innerPadding->
@@ -121,9 +117,12 @@ fun ChatRoom(
             .padding(innerPadding)) {
 
             Messages(
-                messages = chatMessages.reversed(),
+                messages = messages.reversed(),
                 scrollState = rememberLazyListState(),
-                modifier = Modifier.fillMaxWidth().weight(1f)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                sender = sender
             )
 
         }
@@ -195,7 +194,8 @@ private fun ChatNameBar(
 private fun Messages(
     messages: List<ChatMessage>,
     scrollState: LazyListState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    sender: String,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -209,10 +209,10 @@ private fun Messages(
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             itemsIndexed(messages) { index, message ->
-                val isUserMe = message.senderId == "user1"
+                val isUserMe = message.senderId == sender
 
-                val currentDay = message.timestamp.toLocalDateString()
-                val previousDay = messages.getOrNull(index + 1)?.timestamp?.toLocalDateString()
+                val currentDay = message.timestamp
+                val previousDay = messages.getOrNull(index + 1)?.timestamp
 
                 if (currentDay != previousDay) {
 
@@ -241,7 +241,7 @@ private fun Messages(
                         horizontalArrangement = if (isUserMe) Arrangement.End else Arrangement.Start
                     ) {
                         Text(
-                            text = message.timestamp.toLocalDateStringForMessage(),
+                            text = message.timestamp,
                             style = MaterialTheme.typography.bodySmall,
                             color = LocalContentColor.current,
                             fontWeight = FontWeight.ExtraBold
@@ -412,37 +412,6 @@ fun ClickableMessage( message: ChatMessage, isUserMe: Boolean, authorClicked: (S
 }
 
 
-val chatMessages = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-    listOf(
-        ChatMessage("1", "chat1", "user1", "user2", "Hey, how's your day going?", localDateToDate(2025, 6, 2, 9, 0)),
-        ChatMessage("2", "chat1", "user2", "user1", "Hey! It's going alright, just been juggling some tasks at work. How about you?", localDateToDate(2025, 6, 3, 10, 15)),
-        ChatMessage("3", "chat1", "user1", "user2", "Pretty hectic morning honestly. Spent almost 3 hours debugging an issue caused by a missing semicolon 🤦‍♂️", localDateToDate(2025, 6, 3, 10, 45)),
-        ChatMessage("4", "chat1", "user2", "user1", "Oh no! Classic dev problem. Been there, done that. At least you found it!", localDateToDate(2025, 6, 4, 8, 30)),
-        ChatMessage("5", "chat1", "user1", "user2", "True. I just needed to walk away for 10 minutes and the solution magically appeared 😂", localDateToDate(2025, 6, 4, 8, 50)),
-        ChatMessage("6", "chat1", "user2", "user1", "Honestly, that’s my favorite debugging technique. Step away and let the brain do its thing.", localDateToDate(2025, 6, 4, 9, 5)),
-        ChatMessage("7", "chat1", "user1", "user2", "By the way, did you get a chance to review the design doc I shared yesterday?", localDateToDate(2025, 6, 5, 9, 6)),
-        ChatMessage("8", "chat1", "user2", "user1", "Not yet. I was meaning to do it last night but got caught up with some chores. Will do it by lunch today.", localDateToDate(2025, 6, 5, 9, 30)),
-        ChatMessage("9", "chat1", "user1", "user2", "No worries, just wanted to make sure it didn’t slip through. We’re hoping to freeze it by EOD.", localDateToDate(2025, 6, 5, 9, 35)),
-        ChatMessage("10", "chat1", "user2", "user1", "Got it. I’ll prioritize it first thing after this meeting I have at 10.", localDateToDate(2025, 6, 5, 9, 50)),
-        ChatMessage("11", "chat1", "user1", "user2", "Thanks! Oh and random — did you see the new Pixel 9 leaks? They look 🔥", localDateToDate(2025, 6, 5, 10, 10)),
-        ChatMessage("12", "chat1", "user2", "user1", "Yessss! That matte black finish is everything. Also, finally an in-display fingerprint that works?", localDateToDate(2025, 6, 5, 10, 20)),
-        ChatMessage("13", "chat1", "user1", "user2", "If it lives up to the hype, I might actually switch from Samsung. Been a while since Google impressed me tbh.", localDateToDate(2025, 6, 5, 10, 25)),
-        ChatMessage("14", "chat1", "user2", "user1", "Same! I just hope the battery life holds up. All the features are cool but mean nothing if you’re always charging.", localDateToDate(2025, 6, 5, 10, 35)),
-        ChatMessage("15", "chat1", "user1", "user2", "Totally agree. Power banks are not the solution to poor design.", localDateToDate(2025, 6, 5, 10, 45)),
-        ChatMessage("16", "chat1", "user2", "user1", "Speaking of design, that new chat UI you’re building looks super clean. I saw the Figma preview on Slack.", localDateToDate(2025, 6, 5, 11, 0)),
-        ChatMessage("17", "chat1", "user1", "user2", "Thanks man! Been experimenting with Jetpack Compose and material3. The canonical layouts help a lot.", localDateToDate(2025, 6, 5, 11, 10)),
-        ChatMessage("18", "chat1", "user2", "user1", "That’s awesome. I’ve been meaning to get into Compose more seriously. Been stuck with XML layouts forever 😅", localDateToDate(2025, 6, 5, 11, 25)),
-        ChatMessage("19", "chat1", "user1", "user2", "Start with something small. Once you understand state hoisting and remember a few Composables, it feels like magic.", localDateToDate(2025, 6, 5, 11, 40)),
-        ChatMessage("20", "chat1", "user2", "user1", "Noted! Maybe I’ll start with our internal tools. Less pressure there.", localDateToDate(2025, 6, 5, 12, 0)),
-        ChatMessage("21", "chat1", "user1", "user2", "Great idea. Also if you get stuck, just ping me. Happy to help any time 😊", localDateToDate(2025, 6, 5, 12, 10)),
-        ChatMessage("22", "chat1", "user2", "user1", "Really appreciate that. You’re like the Android guru in the team 😂", localDateToDate(2025, 6, 5, 12, 15)),
-        ChatMessage("23", "chat1", "user1", "user2", "Haha, just obsessed with making cool UIs tbh. Still a long way to go!", localDateToDate(2025, 6, 5, 12, 25)),
-        ChatMessage("24", "chat1", "user2", "user1", "Well, you’re doing great. Btw, wanna grab coffee around 4?", localDateToDate(2025, 6, 5, 15, 50)),
-        ChatMessage("25", "chat1", "user1", "user2", "Absolutely. Let’s go to Brew Lab. Their iced latte is perfect for this weather.", localDateToDate(2025, 6, 5, 16, 30))
-    )
-} else {
-    TODO("VERSION.SDK_INT < O")
-}
 
 @Composable
 fun DayHeader(dayString: String) {

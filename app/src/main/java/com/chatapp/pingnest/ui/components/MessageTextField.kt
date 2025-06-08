@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Send
@@ -25,6 +27,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.chatapp.pingnest.ui.theme.PingNestTheme
@@ -33,7 +38,7 @@ import com.chatapp.pingnest.ui.theme.PingNestTheme
 @Composable
 private fun MessageTextFiledPreview() {
     PingNestTheme {
-        MessageTextField()
+//        MessageTextField()
     }
 }
 @Composable
@@ -41,10 +46,12 @@ fun MessageTextField(
     modifier: Modifier = Modifier,
     text: String = "",
     onTextChange: (String) -> Unit = {},
-    onSendMessage: () -> Unit = {}
+    onSendMessage: () -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
     Row (modifier = modifier
-        .fillMaxWidth().padding(horizontal = 8.dp)
+        .fillMaxWidth()
+        .padding(horizontal = 8.dp)
         .heightIn(min = 56.dp),
         verticalAlignment = Alignment.CenterVertically
     ){
@@ -64,16 +71,27 @@ fun MessageTextField(
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                }
             )
+
         )
         Spacer(modifier = Modifier.width(8.dp))
         IconButton(
-            onClick = onSendMessage,
+            onClick = { onSendMessage() },
             colors = IconButtonDefaults.iconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
-            modifier = Modifier.size(56.dp)
+            modifier = Modifier
+                .size(56.dp)
                 .clip(CircleShape)
         ) {
             Icon(

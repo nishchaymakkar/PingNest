@@ -28,12 +28,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import java.util.Locale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.chatapp.pingnest.data.models.ChatMessage
 import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.ui.PingNestViewModel
 import com.chatapp.pingnest.ui.screens.chatroom.ChatRoom
 import com.chatapp.pingnest.ui.screens.homescreen.HomeScreen
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.UUID
 
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
@@ -42,20 +50,26 @@ fun UserListAndChatRoom(
     viewModel: PingNestViewModel
 ) {
     val users by viewModel.users.collectAsStateWithLifecycle()
+    val uiState = viewModel.state
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     var selectedUserIndex: Int? by rememberSaveable { mutableStateOf(null) }
+    val messages by viewModel.messages.collectAsStateWithLifecycle()
     /**
      * selectedUser needs to be in viewModel otherwise it will make app crash
      **/
-    var selectedUser: User? by rememberSaveable { mutableStateOf(null) }
+    var selectedUser = viewModel.user.value
     val navigator = rememberListDetailPaneScaffoldNavigator<Nothing>()
     val scope = rememberCoroutineScope()
     val isListAndDetailVisible = navigator.scaffoldValue[ListDetailPaneScaffoldRole.Detail] == PaneAdaptedValue.Expanded
             && navigator.scaffoldValue[ListDetailPaneScaffoldRole.List] == PaneAdaptedValue.Expanded
+
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    val formattedTime = dateFormat.format(Date())
+
     BackHandler(enabled = navigator.canNavigateBack()) {
         scope.launch {
             navigator.navigateBack()
-            selectedUser = null
+            viewModel.removeUser()
             selectedUserIndex = null
 
         }
@@ -71,8 +85,10 @@ fun UserListAndChatRoom(
                             isLoading = isLoading,
                             users = users,
                             onChatClicked = { index, user ->
-                                selectedUser = user
+                                viewModel.setUser(user)
                                 selectedUserIndex = index
+                                viewModel.getMessages(senderId = uiState.nickname, recipientId = user.nickName)
+                                viewModel.subscribe("/user/queue/messages")
                                 scope.launch {
                                     navigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
                                 }
@@ -82,16 +98,35 @@ fun UserListAndChatRoom(
                     }
                 },
                 detailPane = {
+//                        viewModel.observeMessages()
                     AnimatedPane {
                         ChatRoom(
                             user = selectedUser,
-                            messages = emptyList(),
+                            messages = messages,
                             onNavIconPressed = {
                                 scope.launch {
                                     navigator.navigateBack()
-                                    selectedUser = null
+                                   viewModel.removeUser()
                                 }
-                            }
+                            },
+                            onSend = {
+                                viewModel.getMessages(uiState.nickname,selectedUser?.nickName.toString())
+                                viewModel.send(
+                                    recipientId = selectedUser?.nickName.toString(),
+                                    message = ChatMessage(
+                                        id = selectedUser?.nickName.toString(),
+                                        chatId = UUID.randomUUID().toString(),
+                                        senderId = uiState.nickname,
+                                        recipientId = selectedUser?.nickName.toString(),
+                                        content = viewModel.message,
+                                        timestamp = formattedTime
+                                    )
+                                )
+
+                            },
+                            message = viewModel.message,
+                            onMessageChange = viewModel::onMessageChange,
+                            sender = uiState.nickname
                         )
                     }
                 },
