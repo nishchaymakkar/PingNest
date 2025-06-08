@@ -16,7 +16,7 @@ fun ChatMessageDto.toChatMessage(): ChatMessage = ChatMessage(
     recipientId = this.recipientId,
     content = this.content,
     id = this.id,
-    timestamp = this.timestamp,
+    timestamp = this.timeStamp ?: "",
     chatId = this.chatId
 )
 
@@ -25,7 +25,7 @@ fun ChatMessage.toChatMessageDto(): ChatMessageDto = ChatMessageDto(
     recipientId = this.recipientId,
     content = this.content,
     id = this.id,
-    timestamp = this.timestamp,
+    timeStamp = this.timestamp,
     chatId = this.chatId
 )
 

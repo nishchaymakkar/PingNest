@@ -10,5 +10,5 @@ data class ChatMessageDto(
     val senderId: String,
     val recipientId: String,
     val content: String,
-    val timestamp: String
+    val timeStamp: String? = null
 )
