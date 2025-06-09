@@ -117,7 +117,7 @@ fun ChatRoom(
             .padding(innerPadding)) {
 
             Messages(
-                messages = messages.reversed(),
+                messages = messages,
                 scrollState = rememberLazyListState(),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -190,6 +190,7 @@ private fun ChatNameBar(
 }
 
 
+@SuppressLint("SimpleDateFormat")
 @Composable
 private fun Messages(
     messages: List<ChatMessage>,

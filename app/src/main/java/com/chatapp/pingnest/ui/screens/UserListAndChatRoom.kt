@@ -31,15 +31,11 @@ import androidx.compose.ui.Modifier
 import java.util.Locale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chatapp.pingnest.data.models.ChatMessage
-import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.ui.PingNestViewModel
 import com.chatapp.pingnest.ui.screens.chatroom.ChatRoom
 import com.chatapp.pingnest.ui.screens.homescreen.HomeScreen
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.UUID
 
@@ -74,6 +70,7 @@ fun UserListAndChatRoom(
 
         }
     }
+    val senderName by viewModel.nickname.collectAsStateWithLifecycle()
     SharedTransitionLayout {
         AnimatedContent(targetState = isListAndDetailVisible, label = "users & chat") {
             ListDetailPaneScaffold(
@@ -87,18 +84,21 @@ fun UserListAndChatRoom(
                             onChatClicked = { index, user ->
                                 viewModel.setUser(user)
                                 selectedUserIndex = index
-                                viewModel.getMessages(senderId = uiState.nickname, recipientId = user.nickName)
+                                viewModel.getMessages(senderId = senderName ?: "unknown", recipientId = user.nickName)
                                 viewModel.subscribe("/user/queue/messages")
                                 scope.launch {
                                     navigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
                                 }
-                            }
-
+                            },
+                            onLogOut = {
+                                viewModel.logout()
+                            },
+                            sender = senderName.toString()
                         )
                     }
                 },
                 detailPane = {
-//                        viewModel.observeMessages()
+                        viewModel.observeMessages()
                     AnimatedPane {
                         ChatRoom(
                             user = selectedUser,
@@ -110,13 +110,13 @@ fun UserListAndChatRoom(
                                 }
                             },
                             onSend = {
-                                viewModel.getMessages(uiState.nickname,selectedUser?.nickName.toString())
+                                viewModel.getMessages(senderName.toString(),selectedUser?.nickName.toString())
                                 viewModel.send(
                                     recipientId = selectedUser?.nickName.toString(),
                                     message = ChatMessage(
                                         id = selectedUser?.nickName.toString(),
                                         chatId = UUID.randomUUID().toString(),
-                                        senderId = uiState.nickname,
+                                        senderId = senderName ?: "unknown",
                                         recipientId = selectedUser?.nickName.toString(),
                                         content = viewModel.message,
                                         timestamp = formattedTime
@@ -126,7 +126,7 @@ fun UserListAndChatRoom(
                             },
                             message = viewModel.message,
                             onMessageChange = viewModel::onMessageChange,
-                            sender = uiState.nickname
+                            sender = senderName.toString()
                         )
                     }
                 },
