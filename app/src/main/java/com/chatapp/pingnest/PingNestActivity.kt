@@ -6,8 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chatapp.pingnest.data.models.Status
 import com.chatapp.pingnest.data.models.User
@@ -33,7 +33,10 @@ class PingNestActivity : ComponentActivity() {
             }
             PingNestTheme {
                 Surface {
-
+                    if (isUserPresent){
+                        viewModel.userPresent()
+                        println(isUserPresent)
+                    }
                 if (state.isConnecting){
                     EnterChatRoomDialog(
                     onDismiss = {  },

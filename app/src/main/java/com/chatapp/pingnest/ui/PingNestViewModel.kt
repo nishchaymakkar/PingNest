@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chatapp.pingnest.data.local.DataStoreRepository
 import com.chatapp.pingnest.data.models.ChatMessage
+import com.chatapp.pingnest.data.models.Status
 import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.data.network.RealtimeMessagingClient
 import com.chatapp.pingnest.ui.mappers.toChatMessage
@@ -53,11 +54,22 @@ class PingNestViewModel(
             initialValue = false
         )
 
-    val isUserPresent = dataStoreRepository.currentUser()
+    val fullName: StateFlow<String?> = dataStoreRepository.fullName.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
+    val nickname: StateFlow<String?> = dataStoreRepository.nickname.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
+
+    val isUserPresent: StateFlow<Boolean> = dataStoreRepository.currentUser()
         .stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = UserState()
+        initialValue = false // Initial value is now a Boolean
     )
     fun setUser(newUser: User) {
         _user.value = newUser
@@ -65,16 +77,32 @@ class PingNestViewModel(
     fun removeUser(){
         _user.value = null
     }
+
     fun userPresent() {
         viewModelScope.launch {
             state = state.copy(
                 isConnecting = false
             )
+
+            messagingClient.addUser(
+                destination = "/app/user.addUser",
+                user = User(
+                    nickName = state.nickname,
+                    fullName = state.fullname,
+                    status = Status.ONLINE
+                ).toUserDto()
+            )
+            messagingClient.subscribe("/topic/user")
         }
     }
     fun saveUserLocally(fullName: String, nickname: String){
         viewModelScope.launch {
             dataStoreRepository.saveUser(fullName, nickname)
+        }
+    }
+    fun logout(){
+        viewModelScope.launch {
+            dataStoreRepository.clearUser()
         }
     }
     fun onMessageChange(message: String){
@@ -131,7 +159,7 @@ class PingNestViewModel(
     }
     fun send(recipientId: String,message: ChatMessage){
         viewModelScope.launch {
-            messagingClient.sendMessage( recipientId,message.toChatMessageDto())
+            messagingClient.sendMessage(recipientId,message.toChatMessageDto())
 
         }
     }

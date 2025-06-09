@@ -37,11 +37,14 @@ class DataStoreRepository(
         }
     }
 
-    fun currentUser() = datastore.data.map { preferences ->
+    /**
+     * Checks if a user is currently logged in.
+     * @return A Flow emitting true if both full name and nickname are present, false otherwise.
+     */
+    fun currentUser(): Flow<Boolean> = datastore.data.map { preferences ->
         val fullName = preferences[FULLNAME]
         val nickname = preferences[NICKNAME]
         !fullName.isNullOrEmpty() && !nickname.isNullOrEmpty()
     }
-
 
 }
