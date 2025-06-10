@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">PingNest</string>
     <string name="jumpBottom">Jump to bottom</string>
+    <string name="usertopic">/topic/user</string>
+    <string name="userDestination">/app/user.addUser</string>
+    <string name="messageDestination">/user/queue/messages</string>
 </resources>

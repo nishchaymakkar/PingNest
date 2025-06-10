@@ -92,16 +92,18 @@ class PingNestViewModel(
             state = state.copy(
                 isConnecting = false
             )
-
+            val userName = fullName.value
+            val userNickname = nickname.value
+            if (userName != null && userNickname != null){
             messagingClient.addUser(
                 destination = "/app/user.addUser",
                 user = User(
-                    nickName = state.nickname,
-                    fullName = state.fullname,
+                    nickName = userNickname,
+                    fullName = userName,
                     status = Status.ONLINE
                 ).toUserDto()
             )
-            messagingClient.subscribe("/topic/user")
+            messagingClient.subscribe("/topic/user")}
         }
     }
     fun saveUserLocally(fullName: String, nickname: String){
