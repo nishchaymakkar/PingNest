@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -62,7 +63,7 @@ fun MessageTextField(
             minLines = 1,
             maxLines = 5,
             modifier = Modifier.weight(.8f),
-            shape = CircleShape,
+            shape = RoundedCornerShape(30.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
@@ -73,19 +74,22 @@ fun MessageTextField(
                 unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
             ),
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done
+                keyboardType = KeyboardType.Unspecified,
+                imeAction = ImeAction.Send
             ),
             keyboardActions = KeyboardActions(
-                onDone = {
+                onSend = {
                     focusManager.clearFocus()
+                    onSendMessage()
                 }
             )
 
         )
         Spacer(modifier = Modifier.width(8.dp))
         IconButton(
-            onClick = { onSendMessage() },
+            onClick = { onSendMessage()
+                      focusManager.clearFocus()
+                      },
             colors = IconButtonDefaults.iconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary

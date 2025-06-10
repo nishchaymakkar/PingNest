@@ -2,9 +2,11 @@
 
 package com.chatapp.pingnest.ui.screens.chatroom
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -53,7 +55,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
@@ -67,12 +73,16 @@ import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.ui.components.JumpToBottom
 import com.chatapp.pingnest.ui.components.MessageTextField
 import com.chatapp.pingnest.ui.components.ProfileIcon
+import com.chatapp.pingnest.ui.conversation.DoodleBackground
 import com.chatapp.pingnest.ui.conversation.SymbolAnnotationType
 import com.chatapp.pingnest.ui.conversation.messageFormatter
+import io.ktor.http.fromCookieToGmtDate
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
@@ -89,46 +99,56 @@ fun ChatRoom(
     onMessageChange: (String) -> Unit
 ) {
 
-    if(user != null){
-    Scaffold(
-        topBar = {
-            ChatNameBar(
-                fullname = user.fullName,
-                nickname = user.nickName,
-                modifier = Modifier,
-                onNavIconPressed = onNavIconPressed,
-            )
-        },
-        bottomBar = {
-            MessageTextField(
+    if(user != null) {
+        Scaffold(
+            topBar = {
+                ChatNameBar(
+                    fullname = user.fullName,
+                    nickname = user.nickName,
+                    modifier = Modifier,
+                    onNavIconPressed = onNavIconPressed,
+                )
+            },
+            bottomBar = {
+                MessageTextField(
+                    modifier = Modifier
+                        .background(Color.Transparent)
+                        .padding(bottom = 8.dp),
+                    text = message,
+                    onTextChange = onMessageChange,
+                    onSendMessage = { onSend() }
+                )
+            }
+
+        ) { innerPadding ->
+
+            DoodleBackground(
                 modifier = Modifier
-                    .background(Color.Transparent)
-                    .padding(bottom = 8.dp),
-                text = message,
-                onTextChange = onMessageChange,
-                onSendMessage = { onSend() }
-            )
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+
+
+                Column(
+                    modifier = modifier
+                ) {
+
+                    Messages(
+                        messages = messages.reversed(),
+                        scrollState = rememberLazyListState(),
+                        modifier = Modifier
+                            .fillMaxWidth().weight(1f),
+                        sender = sender
+                    )
+
+
+                }
+
+
+            }
         }
-    ) { innerPadding->
-
-        Column(modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(innerPadding)) {
-
-            Messages(
-                messages = messages,
-                scrollState = rememberLazyListState(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                sender = sender
-            )
-
-        }
-        }
-
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -190,7 +210,7 @@ private fun ChatNameBar(
 }
 
 
-@SuppressLint("SimpleDateFormat")
+
 @Composable
 private fun Messages(
     messages: List<ChatMessage>,
@@ -201,7 +221,7 @@ private fun Messages(
     val scope = rememberCoroutineScope()
 
     Box(
-        modifier
+        modifier.fillMaxSize()
     ) {
         LazyColumn(
             reverseLayout = true,
@@ -212,13 +232,11 @@ private fun Messages(
             itemsIndexed(messages) { index, message ->
                 val isUserMe = message.senderId == sender
 
-                val currentDay = message.timestamp
-                val previousDay = messages.getOrNull(index + 1)?.timestamp
+                val currentDate = message.timestamp.toLocalDate()
+                val previousDate = messages.getOrNull(index + 1)?.timestamp?.toLocalDate()
 
-                if (currentDay != previousDay) {
-
-                    DayHeader(dayString = currentDay)
-
+                if (currentDate != null && currentDate != previousDate) {
+                    DayHeader(dayString = currentDate.toDisplayString())
                 }
                 Column {
                 Row(
@@ -241,12 +259,14 @@ private fun Messages(
                             .padding(vertical = 2.dp, horizontal = 8.dp),
                         horizontalArrangement = if (isUserMe) Arrangement.End else Arrangement.Start
                     ) {
-                        Text(
-                            text = message.timestamp,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = LocalContentColor.current,
-                            fontWeight = FontWeight.ExtraBold
-                        )
+
+                            Text(
+                                text = message.timestamp.toFormattedTime(),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = LocalContentColor.current,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+
                     }
 
 
@@ -368,6 +388,7 @@ fun ChatItemBubble(message: ChatMessage, isUserMe: Boolean, authorClicked: (Stri
     }
 
 }
+
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun ClickableMessage( message: ChatMessage, isUserMe: Boolean, authorClicked: (String) -> Unit) {
@@ -441,19 +462,30 @@ private fun RowScope.DayHeaderLine() {
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
     )
 }
-fun Date.toLocalDateString(): String {
-    val formatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-    return formatter.format(this)
-}
-fun Date.toLocalDateStringForMessage(): String {
-    val formatter = SimpleDateFormat("hh:mm", Locale.getDefault())
-    return formatter.format(this)
+@SuppressLint("NewApi")
+fun String.toLocalDate(): LocalDate? {
+    return try {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        LocalDateTime.parse(this, formatter).toLocalDate()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-fun localDateToDate(year: Int, month: Int, day: Int, hour: Int = 0, minute: Int = 0): Date {
-    return LocalDateTime.of(year, month, day, hour, minute)
-        .atZone(ZoneId.systemDefault())
-        .toInstant()
-        .let { Date.from(it) }
+
+@SuppressLint("NewApi")
+fun LocalDate.toDisplayString(): String {
+    val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+    return this.format(formatter)
+}
+@SuppressLint("NewApi")
+fun String.toFormattedTime(): String {
+    return try {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val dateTime = LocalDateTime.parse(this, formatter)
+        dateTime.format(DateTimeFormatter.ofPattern("hh:mm a"))
+    } catch (e: Exception) {
+        this
+    }
 }
