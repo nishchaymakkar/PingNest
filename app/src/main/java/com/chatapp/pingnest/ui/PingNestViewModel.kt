@@ -1,5 +1,7 @@
 package com.chatapp.pingnest.ui
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,12 +21,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 class PingNestViewModel(
@@ -76,6 +79,12 @@ class PingNestViewModel(
     }
     fun removeUser(){
         _user.value = null
+    }
+
+    @SuppressLint("NewApi")
+    fun getCurrentTimestamp(): String {
+        val now = LocalDateTime.now()
+        return now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
     }
 
     fun userPresent() {
@@ -157,19 +166,29 @@ class PingNestViewModel(
             messagingClient.addUser(destination, user.toUserDto())
         }
     }
-    fun send(recipientId: String,message: ChatMessage){
+    fun send(recipientId: String, senderId: String){
+        val messageToSend = message.trim()
+        if (messageToSend.isNotBlank()){
+        val chatMessage =  ChatMessage(
+            senderId = senderId,
+            recipientId = recipientId,
+            content = messageToSend,
+            timestamp = getCurrentTimestamp()
+        )
         viewModelScope.launch {
-            messagingClient.sendMessage(recipientId,message.toChatMessageDto())
+            messagingClient.sendMessage(recipientId,chatMessage.toChatMessageDto())
 
         }
+        message = ""
+        }
     }
-//    fun observeMessages(){
-//        viewModelScope.launch {
-//            messagingClient.observeMessages().collect{ message ->
-//                _messages.value = messages.value.map { it.copy(content = message) }
-//            }
-//        }
-//    }
+    fun observeMessages(){
+        viewModelScope.launch {
+            messagingClient.observeMessages().collect{ message ->
+                Log.d("PingNestViewModel", "Received message: $message")
+            }
+        }
+    }
 
 
 }

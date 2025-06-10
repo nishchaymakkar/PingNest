@@ -46,19 +46,24 @@ class PingNestActivity : ComponentActivity() {
                     onRealNameChange = { viewModel.onRealNameChange(it) },
                     onEnter = {
 
-
-                        viewModel.saveUserLocally(fullName = state.fullname, nickname = state.nickname)
-
-
-                        viewModel.addUser(
-                            destination = "/app/user.addUser",
-                            user = User(
-                                nickName = state.nickname,
-                                fullName = state.fullname,
-                                status = Status.ONLINE
+                        val fullName = state.fullname.trim()
+                        val nickName = state.nickname.trim()
+                        if (fullName.isNotBlank() && nickName.isNotBlank()){
+                            viewModel.saveUserLocally(fullName = fullName, nickname = nickName)
+                            viewModel.addUser(
+                                destination = getString(R.string.userDestination),
+                                user = User(
+                                    nickName = fullName,
+                                    fullName = nickName,
+                                    status = Status.ONLINE
+                                )
                             )
-                        )
-                        viewModel.subscribe("/topic/user")
+                            viewModel.subscribe(getString(R.string.usertopic))
+                        }
+
+
+
+
 
 
                     }
