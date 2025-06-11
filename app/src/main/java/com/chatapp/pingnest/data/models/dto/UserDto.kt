@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 data class UserDto(
     val nickName: String,
     val fullName: String,
-    val status: Status
+    val status: Status? = null
 )

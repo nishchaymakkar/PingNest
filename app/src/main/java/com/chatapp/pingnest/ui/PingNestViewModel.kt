@@ -100,7 +100,6 @@ class PingNestViewModel(
                 user = User(
                     nickName = userNickname,
                     fullName = userName,
-                    status = Status.ONLINE
                 ).toUserDto()
             )
             messagingClient.subscribe("/topic/user")}

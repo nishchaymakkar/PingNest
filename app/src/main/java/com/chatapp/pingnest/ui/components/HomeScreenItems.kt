@@ -50,7 +50,7 @@ fun DrawerItemHeader(text: String) {
 }
 
 @Composable
-fun ChatItem(nickname: String, fullname: String, selected: Boolean, status: Status, onChatClicked: () -> Unit) {
+fun ChatItem(nickname: String, fullname: String, selected: Boolean, status: Status?, onChatClicked: () -> Unit) {
     val background = if (selected) {
         Modifier.background(MaterialTheme.colorScheme.primaryContainer)
     } else {
