@@ -35,7 +35,6 @@ class PingNestActivity : ComponentActivity() {
                 Surface {
                     if (isUserPresent){
                         viewModel.userPresent()
-                        println(isUserPresent)
                     }
                 if (state.isConnecting){
                     EnterChatRoomDialog(
@@ -53,8 +52,8 @@ class PingNestActivity : ComponentActivity() {
                             viewModel.addUser(
                                 destination = getString(R.string.userDestination),
                                 user = User(
-                                    nickName = fullName,
-                                    fullName = nickName,
+                                    nickName = nickName,
+                                    fullName = fullName,
                                     status = Status.ONLINE
                                 )
                             )
