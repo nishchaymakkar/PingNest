@@ -26,7 +26,9 @@ object AppModule {
     fun provideHttpClient(): HttpClient {
         return HttpClient(CIO){
             install(HttpTimeout){
-                requestTimeoutMillis = 1000
+                connectTimeoutMillis = 10_000 // 10 seconds
+                socketTimeoutMillis = 15_000
+                requestTimeoutMillis = 15_000
             }
             install(Logging)
             install(WebSockets)
