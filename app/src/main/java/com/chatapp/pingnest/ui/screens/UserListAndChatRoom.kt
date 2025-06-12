@@ -89,7 +89,7 @@ fun UserListAndChatRoom(
                     }
                 },
                 detailPane = {
-                        viewModel.observeMessages()
+
                     AnimatedPane {
                         ChatRoom(
                             user = selectedUser,
