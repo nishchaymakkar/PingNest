@@ -243,7 +243,7 @@ class KtorStompMessagingClient(
     }
 
 
-    override suspend fun sendMessage(receipientId: String, message: ChatMessageDto) {
+    override suspend fun sendMessage( message: ChatMessageDto) {
         val json = Json.encodeToString(message)
         withContext(Dispatchers.IO) {
             suspendCoroutine<Unit> { cont ->

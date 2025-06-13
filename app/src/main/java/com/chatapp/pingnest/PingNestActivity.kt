@@ -15,6 +15,7 @@ import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.ui.PingNestViewModel
 import com.chatapp.pingnest.ui.screens.UserListAndChatRoom
 import com.chatapp.pingnest.ui.theme.PingNestTheme
+import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
 class PingNestActivity : ComponentActivity() {
@@ -31,8 +32,6 @@ class PingNestActivity : ComponentActivity() {
                 Unit
             ) {
                 viewModel.connect()
-//                viewModel.subscribe(getString(R.string.usertopic))
-//                viewModel.subscribe(getString(R.string.messageDestination))
             }
             PingNestTheme {
                 Surface {

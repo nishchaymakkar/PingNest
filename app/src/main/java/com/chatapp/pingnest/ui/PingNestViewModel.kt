@@ -19,6 +19,7 @@ import com.chatapp.pingnest.ui.mappers.toChatMessage
 import com.chatapp.pingnest.ui.mappers.toChatMessageDto
 import com.chatapp.pingnest.ui.mappers.toUser
 import com.chatapp.pingnest.ui.mappers.toUserDto
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -107,7 +108,7 @@ class PingNestViewModel(
                 ).toUserDto()
             )
             messagingClient.subscribe("/topic/user")}
-            messagingClient.subscribe("/user/queue/messages")
+
         }
     }
     fun saveUserLocally(fullName: String, nickname: String){
@@ -156,6 +157,17 @@ class PingNestViewModel(
     fun disconnect(){
         viewModelScope.launch {
             messagingClient.disconnect()
+            val userName = fullName.value
+            val userNickname = nickname.value
+            if (userName != null && userNickname != null){
+            messagingClient.addUser(
+                destination = "/app/user.disconnectUser",
+                user = User(
+                    nickName = userNickname,
+                    fullName = userName,
+                ).toUserDto()
+            )
+        }
         }
     }
     fun subscribe(destination: String){
@@ -172,6 +184,15 @@ class PingNestViewModel(
             messagingClient.addUser(destination, user.toUserDto())
         }
     }
+    fun onChatOpen(){
+        viewModelScope.launch {
+        messagingClient.subscribe("/user/queue/messages")
+
+            delay(2000)
+            observeMessages()
+        }
+
+    }
     fun send(recipientId: String, senderId: String){
         val messageToSend = message.trim()
         if (messageToSend.isNotBlank()){
@@ -182,15 +203,15 @@ class PingNestViewModel(
             timestamp = getCurrentTimestamp()
         )
         viewModelScope.launch {
-            messagingClient.sendMessage(recipientId,chatMessage.toChatMessageDto())
+            messagingClient.sendMessage(chatMessage.toChatMessageDto())
+
         }
         message = ""
         }
     }
-    init{
-        observeMessages()
-    }
+
     fun observeMessages(){
+        Log.d("PingNestViewModel","Observing Messages")
         viewModelScope.launch {
             messagingClient.observeMessages().collect{ json ->
                 Log.d("PingNestViewModel", "Received message: $json")

@@ -12,7 +12,7 @@ interface RealtimeMessagingClient {
     suspend fun connect()
     suspend fun subscribe(destination: String)
     suspend fun addUser(destination:String, user: UserDto)
-    suspend fun sendMessage(recipientId: String,message: ChatMessageDto)
+    suspend fun sendMessage(message: ChatMessageDto)
     fun observeMessages(): Flow<String>
     suspend fun disconnect()
 }
