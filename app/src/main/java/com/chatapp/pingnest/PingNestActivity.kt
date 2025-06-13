@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chatapp.pingnest.data.models.Status
 import com.chatapp.pingnest.data.models.User
@@ -30,6 +31,8 @@ class PingNestActivity : ComponentActivity() {
                 Unit
             ) {
                 viewModel.connect()
+//                viewModel.subscribe(getString(R.string.usertopic))
+//                viewModel.subscribe(getString(R.string.messageDestination))
             }
             PingNestTheme {
                 Surface {

@@ -76,7 +76,6 @@ fun UserListAndChatRoom(
                                 viewModel.setUser(user)
                                 selectedUserIndex = index
                                 viewModel.getMessages(senderId = senderName ?: "unknown", recipientId = user.nickName)
-                                viewModel.subscribe(getString(context,R.string.messageDestination))
                                 scope.launch {
                                     navigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
                                 }
@@ -101,11 +100,11 @@ fun UserListAndChatRoom(
                                 }
                             },
                             onSend = {
-                                viewModel.getMessages(senderName.toString(),selectedUser?.nickName.toString())
-                                viewModel.send(
+                                   viewModel.send(
                                     recipientId = selectedUser?.nickName.toString(),
                                     senderId = senderName.toString()
                                 )
+                                viewModel.getMessages(senderName.toString(),selectedUser?.nickName.toString())
 
 
                             },

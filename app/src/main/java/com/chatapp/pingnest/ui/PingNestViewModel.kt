@@ -8,10 +8,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chatapp.pingnest.R
 import com.chatapp.pingnest.data.local.DataStoreRepository
 import com.chatapp.pingnest.data.models.ChatMessage
 import com.chatapp.pingnest.data.models.Status
 import com.chatapp.pingnest.data.models.User
+import com.chatapp.pingnest.data.models.dto.ChatMessageDto
 import com.chatapp.pingnest.data.network.RealtimeMessagingClient
 import com.chatapp.pingnest.ui.mappers.toChatMessage
 import com.chatapp.pingnest.ui.mappers.toChatMessageDto
@@ -23,7 +25,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import java.time.LocalDateTime
@@ -103,6 +107,7 @@ class PingNestViewModel(
                 ).toUserDto()
             )
             messagingClient.subscribe("/topic/user")}
+            messagingClient.subscribe("/user/queue/messages")
         }
     }
     fun saveUserLocally(fullName: String, nickname: String){
@@ -178,15 +183,21 @@ class PingNestViewModel(
         )
         viewModelScope.launch {
             messagingClient.sendMessage(recipientId,chatMessage.toChatMessageDto())
-
         }
         message = ""
         }
     }
+    init{
+        observeMessages()
+    }
     fun observeMessages(){
         viewModelScope.launch {
-            messagingClient.observeMessages().collect{ message ->
-                Log.d("PingNestViewModel", "Received message: $message")
+            messagingClient.observeMessages().collect{ json ->
+                Log.d("PingNestViewModel", "Received message: $json")
+                val message = Json.decodeFromString<ChatMessageDto>(json)
+                _messages.update {
+                    it + message.toChatMessage()
+                }
             }
         }
     }
