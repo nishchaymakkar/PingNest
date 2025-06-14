@@ -101,13 +101,10 @@ fun UserListAndChatRoom(
                                 }
                             },
                             onSend = {
-                                   viewModel.send(
+                                viewModel.send(
                                     recipientId = selectedUser?.nickName.toString(),
                                     senderId = senderName.toString()
                                 )
-                                viewModel.getMessages(senderName.toString(),selectedUser?.nickName.toString())
-
-
                             },
                             message = viewModel.message,
                             onMessageChange = viewModel::onMessageChange,

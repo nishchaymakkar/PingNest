@@ -14,6 +14,7 @@ import com.chatapp.pingnest.data.models.ChatMessage
 import com.chatapp.pingnest.data.models.Status
 import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.data.models.dto.ChatMessageDto
+import com.chatapp.pingnest.data.network.KtorStompMessagingClient
 import com.chatapp.pingnest.data.network.RealtimeMessagingClient
 import com.chatapp.pingnest.ui.mappers.toChatMessage
 import com.chatapp.pingnest.ui.mappers.toChatMessageDto
@@ -187,7 +188,6 @@ class PingNestViewModel(
     fun onChatOpen(){
         viewModelScope.launch {
         messagingClient.subscribe("/user/queue/messages")
-
             delay(2000)
             observeMessages()
         }
@@ -204,7 +204,7 @@ class PingNestViewModel(
         )
         viewModelScope.launch {
             messagingClient.sendMessage(chatMessage.toChatMessageDto())
-
+            _messages.update { it + chatMessage }
         }
         message = ""
         }
@@ -215,14 +215,17 @@ class PingNestViewModel(
         viewModelScope.launch {
             messagingClient.observeMessages().collect{ json ->
                 Log.d("PingNestViewModel", "Received message: $json")
-                val message = Json.decodeFromString<ChatMessageDto>(json)
-                _messages.update {
-                    it + message.toChatMessage()
-                }
             }
+
         }
     }
 
+    override fun onCleared() {
+        viewModelScope.launch {
+            messagingClient.disconnect()
+        }
+        super.onCleared()
+    }
 
 }
 
