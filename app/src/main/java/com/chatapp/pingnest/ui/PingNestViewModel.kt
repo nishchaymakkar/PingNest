@@ -15,6 +15,7 @@ import com.chatapp.pingnest.data.models.Status
 import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.data.models.dto.ChatMessageDto
 import com.chatapp.pingnest.data.network.KtorStompMessagingClient
+import com.chatapp.pingnest.data.network.PingNestApiService
 import com.chatapp.pingnest.data.network.RealtimeMessagingClient
 import com.chatapp.pingnest.ui.mappers.toChatMessage
 import com.chatapp.pingnest.ui.mappers.toChatMessageDto
@@ -37,6 +38,7 @@ import java.time.format.DateTimeFormatter
 
 
 class PingNestViewModel(
+    private val apiClient: PingNestApiService,
     private val messagingClient: RealtimeMessagingClient,
     private val dataStoreRepository: DataStoreRepository
 ): ViewModel() {
@@ -138,14 +140,14 @@ class PingNestViewModel(
 
     fun getUsers(){
         viewModelScope.launch {
-            _users.value = messagingClient.getUsers().map { it ->
+            _users.value = apiClient.getUsers().map { it ->
                 it.toUser()
             }
         }
     }
     fun getMessages(senderId: String, recipientId: String){
         viewModelScope.launch {
-            _messages.value = messagingClient.getMessages(senderId, recipientId).map {
+            _messages.value = apiClient.getMessages(senderId, recipientId).map {
                 it.toChatMessage()
             }
         }
@@ -230,6 +232,6 @@ class PingNestViewModel(
 }
 
 val viewModelModule = module {
-    viewModel { PingNestViewModel(get(),get()) }
+    viewModel { PingNestViewModel(get(),get(),get()) }
 
 }

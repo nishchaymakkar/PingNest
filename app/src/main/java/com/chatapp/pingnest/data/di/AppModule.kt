@@ -5,11 +5,14 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.chatapp.pingnest.data.di.AppModule.dataStore
+import com.chatapp.pingnest.data.di.AppModule.provideApiService
 import com.chatapp.pingnest.data.di.AppModule.provideHttpClient
 import com.chatapp.pingnest.data.di.AppModule.provideMessagingClient
 import com.chatapp.pingnest.data.local.DataStoreRepository
 import com.chatapp.pingnest.data.network.KtorStompMessagingClient
+import com.chatapp.pingnest.data.network.PingNestApiService
 import com.chatapp.pingnest.data.network.RealtimeMessagingClient
+import com.chatapp.pingnest.data.network.StompMessagingClient
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
@@ -37,14 +40,18 @@ object AppModule {
             }
         }
     }
-    fun provideMessagingClient(client: HttpClient): RealtimeMessagingClient {
+    fun provideApiService(client: HttpClient): PingNestApiService {
         return KtorStompMessagingClient(client)
+    }
+    fun provideMessagingClient(): RealtimeMessagingClient {
+        return StompMessagingClient()
     }
 }
 
 val appModule = module {
     single { provideHttpClient()  }
-    single { provideMessagingClient(get()) }
+    single { provideMessagingClient() }
+    single { provideApiService(get()) }
     single { androidContext().dataStore }
     single{ DataStoreRepository(get()) }
 }

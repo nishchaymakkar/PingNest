@@ -16,3 +16,4 @@ local.properties
 /app/src/main/java/com/chatapp/pingnest/ui/theme/ThemeColorRoles.txt
 /app/src/main/java/com/chatapp/pingnest/data/EndPoints.txt
 /app/src/main/java/com/chatapp/pingnest/ui/theme/ThemeColorRoles.txt
+/app/src/main/java/com/chatapp/pingnest/data/network/ktormesaginclient.txt
