@@ -74,7 +74,6 @@ fun UserListAndChatRoom(
                             users = users,
                             onChatClicked = { index, user ->
                                 viewModel.setUser(user)
-                                viewModel.onChatOpen(senderName?:"unkown")
                                 selectedUserIndex = index
                                 viewModel.getMessages(senderId = senderName ?: "unknown", recipientId = user.nickName)
                                 scope.launch {

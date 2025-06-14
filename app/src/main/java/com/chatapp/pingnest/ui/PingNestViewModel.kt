@@ -108,8 +108,12 @@ class PingNestViewModel(
                     nickName = userNickname,
                     fullName = userName,
                 ).toUserDto()
+
             )
-            messagingClient.subscribe("/topic/user")}
+            messagingClient.subscribe("/topic/user")
+
+            }
+
 
         }
     }
@@ -186,7 +190,13 @@ class PingNestViewModel(
             messagingClient.addUser(destination, user.toUserDto())
         }
     }
-    fun onChatOpen(userId: String){
+    init {
+      viewModelScope.launch {
+        delay(4000)
+          subscribeMessages(userId = nickname.value ?: "")
+      }
+    }
+    fun subscribeMessages(userId: String){
         viewModelScope.launch {
         messagingClient.subscribe("/user/$userId/queue/messages")
             delay(2000)
