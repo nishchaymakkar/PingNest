@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import java.time.LocalDateTime
@@ -187,9 +186,9 @@ class PingNestViewModel(
             messagingClient.addUser(destination, user.toUserDto())
         }
     }
-    fun onChatOpen(){
+    fun onChatOpen(userId: String){
         viewModelScope.launch {
-        messagingClient.subscribe("/user/queue/messages")
+        messagingClient.subscribe("/user/$userId/queue/messages")
             delay(2000)
             observeMessages()
         }
@@ -216,6 +215,13 @@ class PingNestViewModel(
         Log.d("PingNestViewModel","Observing Messages")
         viewModelScope.launch {
             messagingClient.observeMessages().collect{ json ->
+                _messages.update { it + ChatMessage(
+                    senderId = json.senderId,
+                    recipientId = json.recipientId,
+                    content = json.content,
+                    id = json.id,
+                    timestamp = getCurrentTimestamp()
+                ) }
                 Log.d("PingNestViewModel", "Received message: $json")
             }
 
