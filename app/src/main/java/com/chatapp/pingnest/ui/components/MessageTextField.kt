@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,6 +34,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.trace
 import com.chatapp.pingnest.ui.theme.PingNestTheme
 
 @Preview(showBackground = true)
@@ -50,25 +52,38 @@ fun MessageTextField(
     onSendMessage: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    Row (modifier = modifier
-        .fillMaxWidth()
-        .padding(horizontal = 8.dp)
-        .heightIn(min = 56.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ){
-        
+
         OutlinedTextField(
             value = text,
             onValueChange = onTextChange,
             minLines = 1,
             maxLines = 5,
-            modifier = Modifier.weight(.8f),
+            modifier = Modifier.imePadding().fillMaxWidth().padding(horizontal = 8.dp).padding(bottom = 8.dp),
+            trailingIcon = {
+                IconButton(
+                    onClick = { onSendMessage()
+                        focusManager.clearFocus()
+                    },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Send,
+                        contentDescription = null
+                    )
+                }
+            },
             shape = RoundedCornerShape(30.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent,
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(.6f),
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(.6f),
+                focusedBorderColor = MaterialTheme.colorScheme.inverseOnSurface,
+                unfocusedBorderColor = MaterialTheme.colorScheme.inverseOnSurface,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceBright,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceBright,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -85,23 +100,7 @@ fun MessageTextField(
             )
 
         )
-        Spacer(modifier = Modifier.width(8.dp))
-        IconButton(
-            onClick = { onSendMessage()
-                      focusManager.clearFocus()
-                      },
-            colors = IconButtonDefaults.iconButtonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ),
-            modifier = Modifier
-                .size(56.dp)
-                .clip(CircleShape)
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.Send,
-                contentDescription = null
-            )
-        }
-    }
+        
+
+
 }

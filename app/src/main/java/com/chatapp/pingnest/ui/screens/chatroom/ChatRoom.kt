@@ -3,10 +3,7 @@
 package com.chatapp.pingnest.ui.screens.chatroom
 
 import android.annotation.SuppressLint
-import android.os.Build
 import androidx.activity.compose.LocalActivity
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -55,11 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
@@ -76,15 +69,11 @@ import com.chatapp.pingnest.ui.components.ProfileIcon
 import com.chatapp.pingnest.ui.conversation.DoodleBackground
 import com.chatapp.pingnest.ui.conversation.SymbolAnnotationType
 import com.chatapp.pingnest.ui.conversation.messageFormatter
-import io.ktor.http.fromCookieToGmtDate
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Date
-import java.util.Locale
+
 
 
 @Composable
@@ -112,7 +101,6 @@ fun ChatRoom(
             bottomBar = {
                 MessageTextField(
                     modifier = Modifier
-                        .background(Color.Transparent)
                         .padding(bottom = 8.dp),
                     text = message,
                     onTextChange = onMessageChange,
@@ -127,8 +115,6 @@ fun ChatRoom(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-
-
                 Column(
                     modifier = modifier
                 ) {
@@ -337,7 +323,7 @@ fun ChatItemBubble(message: ChatMessage, isUserMe: Boolean, authorClicked: (Stri
     val backgroundBubbleColor = if (isUserMe) {
         MaterialTheme.colorScheme.primary
     } else {
-        MaterialTheme.colorScheme.surfaceVariant
+        MaterialTheme.colorScheme.surfaceContainer
     }
 
     val chatBubbleShape = if (isUserMe){

@@ -18,6 +18,7 @@
             android:name=".PingNestActivity"
             android:exported="true"
             android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.PingNest">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
