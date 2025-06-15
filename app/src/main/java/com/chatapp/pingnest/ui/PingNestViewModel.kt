@@ -8,13 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.chatapp.pingnest.R
-import com.chatapp.pingnest.data.local.DataStoreRepository
+import com.chatapp.pingnest.data.local.UserData
 import com.chatapp.pingnest.data.models.ChatMessage
-import com.chatapp.pingnest.data.models.Status
 import com.chatapp.pingnest.data.models.User
-import com.chatapp.pingnest.data.models.dto.ChatMessageDto
-import com.chatapp.pingnest.data.network.KtorStompMessagingClient
 import com.chatapp.pingnest.data.network.PingNestApiService
 import com.chatapp.pingnest.data.network.RealtimeMessagingClient
 import com.chatapp.pingnest.ui.mappers.toChatMessage
@@ -26,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -39,7 +36,7 @@ import java.time.format.DateTimeFormatter
 class PingNestViewModel(
     private val apiClient: PingNestApiService,
     private val messagingClient: RealtimeMessagingClient,
-    private val dataStoreRepository: DataStoreRepository
+    private val userRepository: UserData
 ): ViewModel() {
     var state by mutableStateOf(UserState())
         private set
@@ -64,23 +61,21 @@ class PingNestViewModel(
             initialValue = false
         )
 
-    val fullName: StateFlow<String?> = dataStoreRepository.fullName.stateIn(
+    val userName = userRepository.getFullName().stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = null
+        started = SharingStarted.Eagerly,
+        initialValue = ""
     )
-    val nickname: StateFlow<String?> = dataStoreRepository.nickname.stateIn(
+    val userNickname = userRepository.getNickName().stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = null
+        started = SharingStarted.Eagerly,
+        initialValue = ""
     )
 
-    val isUserPresent: StateFlow<Boolean> = dataStoreRepository.currentUser()
-        .stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = false // Initial value is now a Boolean
-    )
+    val isUserPresent = combine(userName, userNickname) { name, nick ->
+        name.isNotBlank() && nick.isNotBlank()
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     fun setUser(newUser: User) {
         _user.value = newUser
     }
@@ -99,14 +94,13 @@ class PingNestViewModel(
             state = state.copy(
                 isConnecting = false
             )
-            val userName = fullName.value
-            val userNickname = nickname.value
-            if (userName != null && userNickname != null){
+
+            if (userName.value.isNotBlank() && userNickname.value.isNotBlank()){
             messagingClient.addUser(
                 destination = "/app/user.addUser",
                 user = User(
-                    nickName = userNickname,
-                    fullName = userName,
+                    nickName = userNickname.value,
+                    fullName = userName.value,
                 ).toUserDto()
 
             )
@@ -119,12 +113,14 @@ class PingNestViewModel(
     }
     fun saveUserLocally(fullName: String, nickname: String){
         viewModelScope.launch {
-            dataStoreRepository.saveUser(fullName, nickname)
+            userRepository.saveFullName(fullName)
+            userRepository.saveNickName(nickname)
+
         }
     }
     fun logout(){
         viewModelScope.launch {
-            dataStoreRepository.clearUser()
+            userRepository.clearUser()
         }
     }
     fun onMessageChange(message: String){
@@ -163,14 +159,13 @@ class PingNestViewModel(
     fun disconnect(){
         viewModelScope.launch {
             messagingClient.disconnect()
-            val userName = fullName.value
-            val userNickname = nickname.value
-            if (userName != null && userNickname != null){
+
+            if (userName.value.isNotBlank() && userNickname.value.isNotBlank()){
             messagingClient.addUser(
                 destination = "/app/user.disconnectUser",
                 user = User(
-                    nickName = userNickname,
-                    fullName = userName,
+                    nickName = userNickname.value,
+                    fullName = userName.value,
                 ).toUserDto()
             )
         }
@@ -193,7 +188,12 @@ class PingNestViewModel(
     init {
       viewModelScope.launch {
         delay(4000)
-          subscribeMessages(userId = nickname.value ?: "")
+          if (userNickname.value.isNotBlank()){
+          subscribeMessages(userId = userNickname.value)
+          } else {
+              println("User nickname is blank")
+          }
+
       }
     }
     fun subscribeMessages(userId: String){

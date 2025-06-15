@@ -52,7 +52,6 @@ fun UserListAndChatRoom(
     val scope = rememberCoroutineScope()
     val isListAndDetailVisible = navigator.scaffoldValue[ListDetailPaneScaffoldRole.Detail] == PaneAdaptedValue.Expanded
             && navigator.scaffoldValue[ListDetailPaneScaffoldRole.List] == PaneAdaptedValue.Expanded
-    val context = LocalContext.current
     BackHandler(enabled = navigator.canNavigateBack()) {
         scope.launch {
             navigator.navigateBack()
@@ -61,7 +60,7 @@ fun UserListAndChatRoom(
 
         }
     }
-    val senderName by viewModel.nickname.collectAsStateWithLifecycle()
+    val senderName by viewModel.userNickname.collectAsStateWithLifecycle()
     SharedTransitionLayout {
         AnimatedContent(targetState = isListAndDetailVisible, label = "users & chat") {
             ListDetailPaneScaffold(
