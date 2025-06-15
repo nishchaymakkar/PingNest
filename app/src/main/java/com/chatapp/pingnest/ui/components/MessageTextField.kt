@@ -2,6 +2,7 @@ package com.chatapp.pingnest.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,10 +25,12 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
@@ -53,54 +56,63 @@ fun MessageTextField(
 ) {
     val focusManager = LocalFocusManager.current
 
-        OutlinedTextField(
-            value = text,
-            onValueChange = onTextChange,
-            minLines = 1,
-            maxLines = 5,
-            modifier = Modifier.imePadding().fillMaxWidth().padding(horizontal = 8.dp).padding(bottom = 8.dp),
-            trailingIcon = {
-                IconButton(
-                    onClick = { onSendMessage()
-                        focusManager.clearFocus()
-                    },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Send,
-                        contentDescription = null
-                    )
-                }
-            },
-            shape = RoundedCornerShape(30.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.inverseOnSurface,
-                unfocusedBorderColor = MaterialTheme.colorScheme.inverseOnSurface,
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceBright,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceBright,
-                cursorColor = MaterialTheme.colorScheme.primary,
-                focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            ),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Unspecified,
-                imeAction = ImeAction.Send
-            ),
-            keyboardActions = KeyboardActions(
-                onSend = {
-                    focusManager.clearFocus()
-                    onSendMessage()
-                }
-            )
+    OutlinedTextField(
+        value = text,
+        onValueChange = onTextChange,
+        minLines = 1,
+        maxLines = 5,
+        modifier = Modifier.imePadding().fillMaxWidth()
+            .padding(8.dp)
+            .shadow(4.dp, RoundedCornerShape(50)),
 
+        placeholder = {
+            Text(
+                text = "Message"
+            )
+        },
+        trailingIcon = {
+            IconButton(
+                onClick = {
+                    onSendMessage()
+                    focusManager.clearFocus()
+                },
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                modifier = Modifier
+                    .size(56.dp)
+                    .shadow(6.dp, CircleShape)
+                    .clip(CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Send,
+                    contentDescription = null
+                )
+            }
+        },
+        shape = RoundedCornerShape(30.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Color.Transparent,
+            unfocusedBorderColor = Color.Transparent,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceBright,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceBright,
+            cursorColor = MaterialTheme.colorScheme.primary,
+            focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        ),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Unspecified,
+            imeAction = ImeAction.Send
+        ),
+        keyboardActions = KeyboardActions(
+            onSend = {
+                focusManager.clearFocus()
+                onSendMessage()
+            }
         )
-        
+
+    )
 
 
 }

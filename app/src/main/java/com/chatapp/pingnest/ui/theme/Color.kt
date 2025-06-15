@@ -221,5 +221,5 @@ val surfaceContainerHighestDarkHighContrast = Color(0xFF484646)
 
 
 
-
+val colorForLinks = Color(0xFF0fb3f9)
 

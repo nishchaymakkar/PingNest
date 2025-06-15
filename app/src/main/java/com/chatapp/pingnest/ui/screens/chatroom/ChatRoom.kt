@@ -4,7 +4,6 @@ package com.chatapp.pingnest.ui.screens.chatroom
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,16 +51,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chatapp.pingnest.data.models.ChatMessage
+import com.chatapp.pingnest.data.models.Status
 import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.ui.components.JumpToBottom
 import com.chatapp.pingnest.ui.components.MessageTextField
@@ -69,11 +70,39 @@ import com.chatapp.pingnest.ui.components.ProfileIcon
 import com.chatapp.pingnest.ui.conversation.DoodleBackground
 import com.chatapp.pingnest.ui.conversation.SymbolAnnotationType
 import com.chatapp.pingnest.ui.conversation.messageFormatter
+import com.chatapp.pingnest.ui.theme.PingNestTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+@Preview
+@Composable
+private fun ChatRoomPrev() {
+    PingNestTheme { 
+        ChatRoom(
+            modifier = Modifier,
+            user = User(nickName = "testuser" , fullName = "Test User", status = Status.ONLINE),
+            sender = "testuser",
+            messages = listOf(
+                ChatMessage(senderId = "testuser", content = "Hello!", recipientId = "otheruser", timestamp = "2024-03-15 10:00:00"),
+                ChatMessage(senderId = "otheruser", content = "Hi there!",recipientId = "otheruser", timestamp = "2024-03-15 10:01:00"),
+                ChatMessage(senderId = "testuser", content = "How are you doing?",recipientId = "otheruser", timestamp = "2024-03-15 10:02:00"),
+                ChatMessage(senderId = "otheruser", content = "I'm good, thanks! How about you?", recipientId = "otheruser",timestamp = "2024-03-15 10:03:00"),
+                ChatMessage(senderId = "testuser", content = "Doing well. Just working on this chat app.",recipientId = "otheruser", timestamp = "2024-03-15 10:04:00"),
+                ChatMessage(senderId = "otheruser", content = "Oh cool! Sounds interesting.",recipientId = "otheruser", timestamp = "2024-03-15 10:05:00"),
+                ChatMessage(senderId = "testuser", content = "Yeah, it's a fun project.", recipientId = "otheruser",timestamp = "2024-03-16 11:00:00"),
+                ChatMessage(senderId = "otheruser", content = "I can imagine. Keep up the good work!",recipientId = "otheruser", timestamp = "2024-03-16 11:01:00"),
+                ChatMessage(senderId = "testuser", content = "Thanks! Will do. https://www.google.com",recipientId = "otheruser", timestamp = "2024-03-16 11:02:00"),
+                ChatMessage(senderId = "otheruser", content = "Let me know if you need any help @testuser",recipientId = "otheruser", timestamp = "2024-03-16 11:03:00")
+            ),
+            onNavIconPressed = {},
+            onSend = { },
+            message = "",
+            onMessageChange = {}
+        )
+    }
+}
 
 
 @Composable
@@ -123,7 +152,8 @@ fun ChatRoom(
                         messages = messages.reversed(),
                         scrollState = rememberLazyListState(),
                         modifier = Modifier
-                            .fillMaxWidth().weight(1f),
+                            .fillMaxWidth()
+                            .weight(1f),
                         sender = sender
                     )
 
@@ -338,6 +368,7 @@ fun ChatItemBubble(message: ChatMessage, isUserMe: Boolean, authorClicked: (Stri
         elevation = CardDefaults.cardElevation(
             defaultElevation = 5.dp
         ),
+        modifier = Modifier.shadow(10.dp,chatBubbleShape),
         shape = chatBubbleShape
     ) {
         Surface(
@@ -410,7 +441,7 @@ fun ClickableMessage( message: ChatMessage, isUserMe: Boolean, authorClicked: (S
             },
         onTextLayout = {layoutResult = it},
         style = MaterialTheme.typography.bodyLarge.copy(
-            color = LocalContentColor.current,
+            color = LocalContentColor.current ,
             fontSize = 16.sp
         ),
         maxLines = Int.MAX_VALUE,
