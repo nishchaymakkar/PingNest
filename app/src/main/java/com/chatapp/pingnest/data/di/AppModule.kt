@@ -2,13 +2,18 @@ package com.chatapp.pingnest.data.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
-import com.chatapp.pingnest.data.di.AppModule.dataStore
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import com.chatapp.pingnest.data.di.AppModule.provideApiService
+import com.chatapp.pingnest.data.di.AppModule.provideDataPrefs
+import com.chatapp.pingnest.data.di.AppModule.provideDataStore
 import com.chatapp.pingnest.data.di.AppModule.provideHttpClient
 import com.chatapp.pingnest.data.di.AppModule.provideMessagingClient
-import com.chatapp.pingnest.data.local.DataStoreRepository
+import com.chatapp.pingnest.data.local.UserPreferencesRepository
+import com.chatapp.pingnest.data.local.UserData
 import com.chatapp.pingnest.data.network.KtorStompMessagingClient
 import com.chatapp.pingnest.data.network.PingNestApiService
 import com.chatapp.pingnest.data.network.RealtimeMessagingClient
@@ -20,12 +25,21 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.util.logging.Logger
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 object AppModule {
-    val Context.dataStore: DataStore<Preferences> by preferencesDataStore("user_prefs")
+    fun provideDataStore(context: Context): DataStore<Preferences>{
+        return PreferenceDataStoreFactory.create(
+            corruptionHandler = ReplaceFileCorruptionHandler(
+                produceNewData = { emptyPreferences() }
+            ),
+            produceFile = { context.preferencesDataStoreFile("user_data") }
+        )
+    }
+    fun provideDataPrefs(dataStore: DataStore<Preferences>): UserData {
+        return UserPreferencesRepository(dataStore)
+    }
     fun provideHttpClient(): HttpClient {
         return HttpClient(CIO){
             install(HttpTimeout){
@@ -52,6 +66,7 @@ val appModule = module {
     single { provideHttpClient()  }
     single { provideMessagingClient() }
     single { provideApiService(get()) }
-    single { androidContext().dataStore }
-    single{ DataStoreRepository(get()) }
+    single { provideDataStore(androidContext())  }
+    single { provideDataPrefs(get()) }
+    single{ UserPreferencesRepository(get()) }
 }
