@@ -104,7 +104,6 @@ fun UserListAndChatRoom(
                                     senderId = senderName.toString()
                                 )
                             },
-                            message = viewModel.message,
                             onMessageChange = viewModel::onMessageChange,
                             sender = senderName.toString()
                         )

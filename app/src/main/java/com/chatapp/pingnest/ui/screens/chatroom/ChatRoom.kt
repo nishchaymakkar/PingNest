@@ -49,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -57,6 +58,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -76,9 +78,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-@Preview
+@Preview(showSystemUi = true)
 @Composable
 private fun ChatRoomPrev() {
+    var text by remember {  mutableStateOf("")}
     PingNestTheme { 
         ChatRoom(
             modifier = Modifier,
@@ -98,8 +101,7 @@ private fun ChatRoomPrev() {
             ),
             onNavIconPressed = {},
             onSend = { },
-            message = "",
-            onMessageChange = {}
+            onMessageChange = { text = it}
         )
     }
 }
@@ -113,9 +115,9 @@ fun ChatRoom(
     messages: List<ChatMessage>,
     onNavIconPressed: () -> Unit,
     onSend: ()-> Unit,
-    message: String,
     onMessageChange: (String) -> Unit
 ) {
+
 
     if(user != null) {
         Scaffold(
@@ -131,9 +133,9 @@ fun ChatRoom(
                 MessageTextField(
                     modifier = Modifier
                         .padding(bottom = 8.dp),
-                    text = message,
-                    onTextChange = onMessageChange,
-                    onSendMessage = { onSend() }
+                    onSendMessage = {
+                        onMessageChange(it.text)
+                        onSend() }
                 )
             }
 
@@ -441,7 +443,7 @@ fun ClickableMessage( message: ChatMessage, isUserMe: Boolean, authorClicked: (S
             },
         onTextLayout = {layoutResult = it},
         style = MaterialTheme.typography.bodyLarge.copy(
-            color = LocalContentColor.current ,
+            color = LocalContentColor.current,
             fontSize = 16.sp
         ),
         maxLines = Int.MAX_VALUE,
