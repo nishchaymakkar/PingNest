@@ -5,4 +5,5 @@
     <string name="userDestination">/app/user.addUser</string>
     <string name="emoji_selector_desc">Emoji selector</string>
     <string name="messageDestination">/user/queue/messages</string>
+    <string name="messages_widget_title">Unread Messages</string>
 </resources>
