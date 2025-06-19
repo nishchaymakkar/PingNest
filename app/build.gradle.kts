@@ -63,8 +63,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation (libs.androidx.foundation)// or latest stable
     implementation(libs.lifecycle.viewmodel.compose)
-    implementation("androidx.compose.material3:material3:1.4.0-alpha15")
-    implementation("androidx.compose.material:material-icons-extended:1.6.0")
+    implementation(libs.androidx.compose.material3.material3)
+    implementation(libs.androidx.material.icons.extended)
     implementation (libs.androidx.window)
     implementation( libs.androidx.adaptive)
     implementation (libs.androidx.adaptive.layout)
@@ -87,21 +87,13 @@ dependencies {
     implementation(libs.ktor.client.logging)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
-    //stomp
-    implementation(libs.stompprotocolandroid)
-    //rxjava
-    implementation ("io.reactivex.rxjava2:rxjava:2.2.21")
-    implementation ("io.reactivex.rxjava2:rxandroid:2.1.1")
     //datastore
     implementation(libs.androidx.datastore.preferences)
 
-
-    implementation("org.hildan.krossbow:krossbow-stomp-core:7.0.0")
-    implementation("org.hildan.krossbow:krossbow-websocket-okhttp:7.0.0")
-    implementation("org.hildan.krossbow:krossbow-stomp-kxserialization-json:7.0.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.6.3")
-    implementation("org.hildan.krossbow:krossbow-websocket-builtin:7.0.0")
-    implementation("com.squareup.moshi:moshi:1.15.0")
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
+    //stomp
+    implementation(libs.krossbow.stomp.core)
+    implementation(libs.krossbow.websocket.okhttp)
+    implementation(libs.krossbow.stomp.kxserialization.json)
+    implementation(libs.krossbow.websocket.builtin)
 
 }
