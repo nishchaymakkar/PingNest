@@ -14,7 +14,7 @@ import com.chatapp.pingnest.data.di.AppModule.provideHttpClient
 import com.chatapp.pingnest.data.di.AppModule.provideMessagingClient
 import com.chatapp.pingnest.data.local.UserPreferencesRepository
 import com.chatapp.pingnest.data.local.UserData
-import com.chatapp.pingnest.data.network.KtorStompMessagingClient
+import com.chatapp.pingnest.data.network.PingNestApiServiceImpl
 import com.chatapp.pingnest.data.network.PingNestApiService
 import com.chatapp.pingnest.data.network.RealtimeMessagingClient
 import com.chatapp.pingnest.data.network.StompMessagingClient
@@ -55,7 +55,7 @@ object AppModule {
         }
     }
     fun provideApiService(client: HttpClient): PingNestApiService {
-        return KtorStompMessagingClient(client)
+        return PingNestApiServiceImpl(client)
     }
     fun provideMessagingClient(): RealtimeMessagingClient {
         return StompMessagingClient()
