@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 fun DoodleBackground(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
         Canvas (modifier = Modifier.fillMaxSize()) {
-            val spacing = 80.dp.toPx()  // smaller spacing
+            val spacing = 30.dp.toPx()
             val iconSize = 18.dp.toPx()
             val strokeWidth = 1.5.dp.toPx()
 

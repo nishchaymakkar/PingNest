@@ -129,7 +129,7 @@ private fun getSymbolAnnotation(
             AnnotatedString(
                 text = matchResult.value,
                 spanStyle = SpanStyle(
-                    color = colorForLinks,
+                    color = if (primary) colorScheme.surface else colorScheme.primary,
                     textDecoration = TextDecoration.Underline
                 ),
             ),

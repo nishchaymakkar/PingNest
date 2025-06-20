@@ -49,7 +49,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -58,7 +57,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -78,7 +76,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-@Preview(showSystemUi = true)
+@Preview( showSystemUi = true)
 @Composable
 private fun ChatRoomPrev() {
     var text by remember {  mutableStateOf("")}
@@ -190,7 +188,7 @@ private fun ChatNameBar(
                 horizontalArrangement = Arrangement.Start
             ) {
                 ProfileIcon(
-                    size = 40.dp,  // Slightly larger profile icon
+                    size = 40.dp,
                     name = fullname,
                     modifier = Modifier.padding(start = 12.dp)
                 )
