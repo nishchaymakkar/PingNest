@@ -13,8 +13,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chatapp.pingnest.data.models.Status
 import com.chatapp.pingnest.data.models.User
+import com.chatapp.pingnest.ui.PingNestApp
 import com.chatapp.pingnest.ui.PingNestViewModel
-import com.chatapp.pingnest.ui.screens.UserListAndChatRoom
+//import com.chatapp.pingnest.ui.screens.UserListAndChatRoom
 import com.chatapp.pingnest.ui.theme.PingNestTheme
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
@@ -63,21 +64,18 @@ class PingNestActivity : ComponentActivity() {
                             viewModel.subscribe(getString(R.string.usertopic))
                         }
 
-
-
-
-
-
                     }
                 ) } else {
-                    UserListAndChatRoom(
+                    PingNestApp(
                         viewModel = viewModel
                     )
+//                    UserListAndChatRoom(
+//                        viewModel = viewModel
+//                    )
                 }
                 }
             }
             DisposableEffect(Unit) {
-                viewModel.disconnect()
                 onDispose {
                     viewModel.disconnect()
                 }
@@ -85,13 +83,6 @@ class PingNestActivity : ComponentActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        setContent {
-            val viewModel = koinViewModel<PingNestViewModel>()
-                viewModel.disconnect()
-        }
 
-    }
 }
 
