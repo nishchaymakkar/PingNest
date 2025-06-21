@@ -12,6 +12,8 @@ import com.chatapp.pingnest.data.di.AppModule.provideDataPrefs
 import com.chatapp.pingnest.data.di.AppModule.provideDataStore
 import com.chatapp.pingnest.data.di.AppModule.provideHttpClient
 import com.chatapp.pingnest.data.di.AppModule.provideMessagingClient
+import com.chatapp.pingnest.data.fake.FakeMessagingClient
+import com.chatapp.pingnest.data.fake.FakePingNestApiService
 import com.chatapp.pingnest.data.local.UserPreferencesRepository
 import com.chatapp.pingnest.data.local.UserData
 import com.chatapp.pingnest.data.network.PingNestApiServiceImpl
@@ -55,10 +57,10 @@ object AppModule {
         }
     }
     fun provideApiService(client: HttpClient): PingNestApiService {
-        return PingNestApiServiceImpl(client)
+        return FakePingNestApiService()
     }
     fun provideMessagingClient(): RealtimeMessagingClient {
-        return StompMessagingClient()
+        return FakeMessagingClient()
     }
 }
 
