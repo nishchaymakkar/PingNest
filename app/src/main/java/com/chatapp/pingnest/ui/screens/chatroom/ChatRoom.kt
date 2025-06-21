@@ -4,6 +4,7 @@ package com.chatapp.pingnest.ui.screens.chatroom
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -65,9 +66,8 @@ import com.chatapp.pingnest.data.models.ChatMessage
 import com.chatapp.pingnest.data.models.Status
 import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.ui.components.JumpToBottom
-import com.chatapp.pingnest.ui.components.MessageTextField
+import com.chatapp.pingnest.ui.components.InputBar
 import com.chatapp.pingnest.ui.components.ProfileIcon
-import com.chatapp.pingnest.ui.conversation.DoodleBackground
 import com.chatapp.pingnest.ui.conversation.SymbolAnnotationType
 import com.chatapp.pingnest.ui.conversation.messageFormatter
 import com.chatapp.pingnest.ui.theme.PingNestTheme
@@ -128,24 +128,22 @@ fun ChatRoom(
                 )
             },
             bottomBar = {
-                MessageTextField(
+                InputBar(
                     modifier = Modifier
                         .padding(bottom = 8.dp),
                     onSendMessage = {
                         onMessageChange(it.text)
-                        onSend() }
+                        onSend() },
+                    onCameraClick = {},
+                    onGalleryClick = {}
                 )
             }
 
         ) { innerPadding ->
 
-            DoodleBackground(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
                 Column(
-                    modifier = modifier
+                    modifier = modifier .fillMaxSize()
+                        .padding(innerPadding).background(MaterialTheme.colorScheme.background)
                 ) {
 
                     Messages(
@@ -163,7 +161,7 @@ fun ChatRoom(
 
             }
         }
-    }
+
 
 }
 
