@@ -88,7 +88,8 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
     //datastore
-    implementation(libs.androidx.datastore.preferences)
+    implementation (libs.androidx.datastore)
+    implementation (libs.kotlinx.collections.immutable)
 
     //stomp
     implementation(libs.krossbow.stomp.core)

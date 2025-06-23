@@ -3,12 +3,14 @@ adaptive = "1.1.0"
 adaptiveLayout = "1.1.0"
 agp = "8.10.1"
 animation = "1.8.3"
+datastore = "1.1.7"
 foundation = "1.8.3"
 kotlin = "2.1.21"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
+kotlinxCollectionsImmutable = "0.3.5"
 krossbowStompCore = "7.0.0"
 krossbowStompKxserializationJson = "7.0.0"
 krossbowWebsocketBuiltin = "7.0.0"
@@ -27,7 +29,6 @@ koinAndroid = "3.4.0"
 koinAndroidxCompose = "3.4.6"
 lifecycleViewmodelCompose = "2.9.1"
 serialization = "1.8.1"
-datastorePreferences = "1.1.7"
 glanceAppwidget = "1.1.1"
 nav3Core = "1.0.0-alpha04"
 lifecycleViewmodelNav3 = "1.0.0-alpha02"
@@ -58,6 +59,7 @@ androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroidxCompose" }
 #krossbow stomp
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 krossbow-stomp-kxserialization-json = { module = "org.hildan.krossbow:krossbow-stomp-kxserialization-json", version.ref = "krossbowStompKxserializationJson" }
 krossbow-websocket-builtin = { module = "org.hildan.krossbow:krossbow-websocket-builtin", version.ref = "krossbowWebsocketBuiltin" }
 krossbow-websocket-okhttp = { module = "org.hildan.krossbow:krossbow-websocket-okhttp", version.ref = "krossbowWebsocketOkhttp" }
@@ -70,9 +72,8 @@ ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "k
 ktor-client-websockets = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientContentNegotiation" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorClientContentNegotiation" }
-ktor-client-timeout = { module = "io.ktor:ktor-client-timeout", version.ref = "ktor" }
 #datastore
-androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 #seraialization
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization"}
 #glance
@@ -87,6 +88,7 @@ androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runt
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }
 androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "material3AdaptiveNav3" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
