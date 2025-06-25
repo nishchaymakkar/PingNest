@@ -2,6 +2,7 @@
 
 package com.chatapp.pingnest.ui.screens.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,6 +50,7 @@ fun PrivacySettings(modifier: Modifier = Modifier,onNavBackClicked: () -> Unit) 
         Box(
             modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(it),
             contentAlignment = Alignment.Center
         ){ if (popUp){
