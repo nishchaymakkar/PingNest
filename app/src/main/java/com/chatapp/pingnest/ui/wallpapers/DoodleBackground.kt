@@ -1,4 +1,4 @@
-package com.chatapp.pingnest.ui.conversation
+package com.chatapp.pingnest.ui.wallpapers
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -12,44 +12,64 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun DoodleBackground(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun DoodleBackground(modifier: Modifier = Modifier) {
     Box(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
-        Canvas (modifier = Modifier.fillMaxSize()) {
-            val spacing = 30.dp.toPx()
-            val iconSize = 18.dp.toPx()
-            val strokeWidth = 1.5.dp.toPx()
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val spacing = 100.dp.toPx()
+            val iconSize = 14.dp.toPx()
+            val strokeWidth = 1.dp.toPx()
 
             val width = size.width
             val height = size.height
 
-            for (x in 0..(width  / spacing * 17).toInt()) {
-                for (y in 0..(height*5 / spacing * 3).toInt()) {
+            for (x in 0..(width / spacing).toInt()) {
+                for (y in 0..(height / spacing).toInt()) {
                     val offsetX = x * spacing
                     val offsetY = y * spacing
 
-                    when ((x + y) % 8) {
-                        0 -> drawMusicNote(offsetX, offsetY, iconSize, strokeWidth)
-                        1 -> drawStar(offsetX, offsetY, iconSize, strokeWidth)
-                        2 -> drawChatBubble(offsetX, offsetY, iconSize, strokeWidth)
-                        3 -> drawHeart(offsetX, offsetY, iconSize, strokeWidth)
-                        4 -> drawCatFace(offsetX, offsetY, iconSize, strokeWidth)
-                        5 -> drawCloud(offsetX, offsetY, iconSize, strokeWidth)
-                        6 -> drawDrum(offsetX, offsetY, iconSize, strokeWidth)
-                        7 -> drawBird(offsetX, offsetY, iconSize, strokeWidth)
+                    if (offsetX > width || offsetY > height) continue
+
+                    when ((x + y) % 4) { // fewer variants
+                        0 -> drawSimpleStar(offsetX, offsetY, iconSize, strokeWidth)
+                        1 -> drawSimpleBubble(offsetX, offsetY, iconSize, strokeWidth)
+                        2 -> drawSimpleHeart(offsetX, offsetY, iconSize, strokeWidth)
+                        3 -> drawCircle(Color.Gray, iconSize / 3, Offset(offsetX, offsetY), style = Stroke(strokeWidth))
                     }
                 }
             }
         }
-
-        content()
     }
 }
+fun DrawScope.drawSimpleStar(x: Float, y: Float, size: Float, stroke: Float) {
+    val half = size / 2
+    drawLine(Color.Gray, Offset(x - half, y), Offset(x + half, y), stroke)
+    drawLine(Color.Gray, Offset(x, y - half), Offset(x, y + half), stroke)
+}
+
+fun DrawScope.drawSimpleBubble(x: Float, y: Float, size: Float, stroke: Float) {
+    val radius = size / 2
+    drawCircle(Color.Gray, radius = radius, center = Offset(x, y), style = Stroke(stroke))
+    drawLine(Color.Gray, Offset(x + radius / 2, y + radius / 2), Offset(x + radius, y + radius), stroke)
+}
+
+fun DrawScope.drawSimpleHeart(x: Float, y: Float, size: Float, stroke: Float) {
+    val path = Path().apply {
+        moveTo(x, y + size / 4)
+        cubicTo(x - size, y - size / 2, x - size / 2, y - size, x, y - size / 3)
+        cubicTo(x + size / 2, y - size, x + size, y - size / 2, x, y + size / 4)
+        close()
+    }
+    drawPath(path, Color.Gray, style = Stroke(stroke))
+}
+
+
 
 fun DrawScope.drawMusicNote(x: Float, y: Float, size: Float, stroke: Float) {
     drawLine(Color.Gray, Offset(x, y), Offset(x, y - size), strokeWidth = stroke)
@@ -71,7 +91,7 @@ fun DrawScope.drawChatBubble(x: Float, y: Float, size: Float, stroke: Float) {
 }
 
 fun DrawScope.drawHeart(x: Float, y: Float, size: Float, stroke: Float) {
-    val path = androidx.compose.ui.graphics.Path().apply {
+    val path = Path().apply {
         moveTo(x, y + size / 4)
         cubicTo(x - size, y - size / 2, x - size / 2, y - size, x, y - size / 3)
         cubicTo(x + size / 2, y - size, x + size, y - size / 2, x, y + size / 4)
