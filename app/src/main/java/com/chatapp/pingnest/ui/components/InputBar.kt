@@ -3,6 +3,7 @@ package com.chatapp.pingnest.ui.components
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,7 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -65,7 +67,7 @@ private fun MessageTextFiledPreview() {
         InputBar(
             onSendMessage = {},
             onCameraClick = {},
-            onGalleryClick = {}
+            onGalleryClick = {}, primaryColor = MaterialTheme.colorScheme.primary
         )
     }
 }
@@ -75,7 +77,8 @@ fun InputBar(
     modifier: Modifier = Modifier,
     onSendMessage: (TextFieldValue) -> Unit,
     onCameraClick: () -> Unit,
-    onGalleryClick: () -> Unit
+    onGalleryClick: () -> Unit,
+    primaryColor: Color
 ) {
     val focusManager = LocalFocusManager.current
     val focusRequest = remember { FocusRequester() }
@@ -99,14 +102,16 @@ fun InputBar(
     }
 
     Surface(
-        modifier = modifier,
+        modifier = modifier
+            .imePadding(),
         tonalElevation = 3.dp,
     ) {
 
 
 
-    Column(modifier = modifier) {
+    Column(modifier = Modifier) {
         Row (
+            modifier = Modifier .background(MaterialTheme.colorScheme.surface).padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ){
@@ -116,7 +121,7 @@ fun InputBar(
                 Icon(
                     imageVector = Icons.Default.CameraAlt,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = primaryColor
                 )
             }
             IconButton(
@@ -125,7 +130,7 @@ fun InputBar(
                 Icon(
                     imageVector = Icons.Default.PhotoLibrary,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = primaryColor
                 )
             }
             OutlinedTextField(
@@ -133,10 +138,8 @@ fun InputBar(
                 onValueChange = { messageText = it },
                 minLines = 1,
                 maxLines = 3,
-                modifier = Modifier
-                    .imePadding().weight(1f)
-                    .padding(8.dp)
-                    .shadow(4.dp, RoundedCornerShape(50)),
+                modifier = Modifier.shadow(elevation = 4.dp, shape = RoundedCornerShape(30.dp))
+                    .weight(1f),
                 leadingIcon = {
                     IconButton(onClick = {
                         if (isKeyboardOpen) {
@@ -165,7 +168,7 @@ fun InputBar(
                     unfocusedBorderColor = Color.Transparent,
                     focusedContainerColor = MaterialTheme.colorScheme.surfaceBright,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceBright,
-                    cursorColor = MaterialTheme.colorScheme.primary,
+                    cursorColor = primaryColor,
                     focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
@@ -189,8 +192,8 @@ fun InputBar(
                     keyboardController?.hide()
                 },
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = primaryColor,
+                    contentColor = MaterialTheme.colorScheme.surface
                 ),
                 modifier = Modifier
                     .size(56.dp)
