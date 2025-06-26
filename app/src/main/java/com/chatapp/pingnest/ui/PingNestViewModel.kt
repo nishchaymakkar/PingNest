@@ -6,10 +6,14 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.chatapp.pingnest.data.local.UserData
+import com.chatapp.pingnest.data.models.AppSettings
+import com.chatapp.pingnest.data.models.AppTheme
 import com.chatapp.pingnest.data.models.ChatMessage
+import com.chatapp.pingnest.data.models.ChatThemeType
+import com.chatapp.pingnest.data.models.ChatWallpaperType
 import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.data.network.PingNestApiService
 import com.chatapp.pingnest.data.network.RealtimeMessagingClient
@@ -17,12 +21,18 @@ import com.chatapp.pingnest.ui.mappers.toChatMessage
 import com.chatapp.pingnest.ui.mappers.toChatMessageDto
 import com.chatapp.pingnest.ui.mappers.toUser
 import com.chatapp.pingnest.ui.mappers.toUserDto
+import com.chatapp.pingnest.ui.photopicker.PhotoPickerViewModel
+import com.chatapp.pingnest.ui.screens.chatroom.ChatRoomViewModel
+import com.chatapp.pingnest.ui.screens.settings.SettingsViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -36,7 +46,7 @@ import java.time.format.DateTimeFormatter
 class PingNestViewModel(
     private val apiClient: PingNestApiService,
     private val messagingClient: RealtimeMessagingClient,
-    private val userRepository: UserData
+    private val appSettings: DataStore<AppSettings>
 ): ViewModel() {
     var state by mutableStateOf(UserState())
         private set
@@ -61,21 +71,24 @@ class PingNestViewModel(
             initialValue = false
         )
 
-    val userName = userRepository.getFullName().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Eagerly,
-        initialValue = ""
-    )
-    val userNickname = userRepository.getNickName().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Eagerly,
-        initialValue = ""
-    )
+//    val userName = userRepository.getFullName().stateIn(
+//        scope = viewModelScope,
+//        started = SharingStarted.Eagerly,
+//        initialValue = ""
+//    )
+//    val userNickname = userRepository.getNickName().stateIn(
+//        scope = viewModelScope,
+//        started = SharingStarted.Eagerly,
+//        initialValue = ""
+//    )
 
+
+
+    val userName = appSettings.data.map { it.userData.fullName }
+    val userNickname = appSettings.data.map { it.userData.nickName }
     val isUserPresent = combine(userName, userNickname) { name, nick ->
         name.isNotBlank() && nick.isNotBlank()
     }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
     fun setUser(newUser: User) {
         _user.value = newUser
     }
@@ -95,12 +108,12 @@ class PingNestViewModel(
                 isConnecting = false
             )
 
-            if (userName.value.isNotBlank() && userNickname.value.isNotBlank()){
+            if (userName.first() != "" && userNickname.first() != ""){
             messagingClient.addUser(
                 destination = "/app/user.addUser",
                 user = User(
-                    nickName = userNickname.value,
-                    fullName = userName.value,
+                    nickName = userNickname.first(),
+                    fullName = userName.first(),
                 ).toUserDto()
 
             )
@@ -113,16 +126,19 @@ class PingNestViewModel(
     }
     fun saveUserLocally(fullName: String, nickname: String){
         viewModelScope.launch {
-            userRepository.saveFullName(fullName)
-            userRepository.saveNickName(nickname)
+//            userRepository.saveFullName(fullName)
+//            userRepository.saveNickName(nickname)
+
+            appSettings.updateData {
+                it.copy(
+                    userData = User(
+                        fullName = fullName,
+                        nickName = nickname
+                    ))}
 
         }
     }
-    fun logout(){
-        viewModelScope.launch {
-            userRepository.clearUser()
-        }
-    }
+
     fun onMessageChange(message: String){
         this.message = message
     }
@@ -160,12 +176,12 @@ class PingNestViewModel(
         viewModelScope.launch {
             messagingClient.disconnect()
 
-            if (userName.value.isNotBlank() && userNickname.value.isNotBlank()){
+            if (userName.first() != "" && userNickname.first() != ""){
             messagingClient.addUser(
                 destination = "/app/user.disconnectUser",
                 user = User(
-                    nickName = userNickname.value,
-                    fullName = userName.value,
+                    nickName = userNickname.first(),
+                    fullName = userName.first(),
                 ).toUserDto()
             )
         }
@@ -188,8 +204,8 @@ class PingNestViewModel(
     init {
       viewModelScope.launch {
         delay(4000)
-          if (userNickname.value.isNotBlank()){
-          subscribeMessages(userId = userNickname.value)
+          if (userNickname.first() != ""){
+          subscribeMessages(userId = userNickname.first())
           } else {
               println("User nickname is blank")
           }
@@ -245,9 +261,6 @@ class PingNestViewModel(
         super.onCleared()
     }
 
+    val themeFlow = appSettings.data.map { it.theme }
 }
 
-val viewModelModule = module {
-    viewModel { PingNestViewModel(get(),get(),get()) }
-
-}

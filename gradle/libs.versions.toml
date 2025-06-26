@@ -1,22 +1,23 @@
 [versions]
 adaptive = "1.1.0"
 adaptiveLayout = "1.1.0"
-agp = "8.10.1"
+agp = "8.11.0"
 animation = "1.8.3"
 datastore = "1.1.7"
+desugar_jdk_libs = "2.1.5"
 foundation = "1.8.3"
-kotlin = "2.1.21"
+kotlin = "2.2.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-kotlinxCollectionsImmutable = "0.3.5"
-krossbowStompCore = "7.0.0"
-krossbowStompKxserializationJson = "7.0.0"
-krossbowWebsocketBuiltin = "7.0.0"
-krossbowWebsocketOkhttp = "7.0.0"
-ktor = "2.3.2"
-ktorClientContentNegotiation = "2.3.2"
+kotlinxCollectionsImmutable = "0.4.0"
+krossbowStompCore = "9.3.0"
+krossbowStompKxserializationJson = "9.3.0"
+krossbowWebsocketBuiltin = "9.3.0"
+krossbowWebsocketOkhttp = "9.3.0"
+ktor = "2.3.8"
+ktorClientContentNegotiation = "2.3.8"
 lifecycleRuntimeKtx = "2.9.1"
 activityCompose = "1.10.1"
 composeBom = "2025.06.01"
@@ -25,8 +26,8 @@ material3WindowSizeClass = "1.3.2"
 materialIconsExtended = "1.7.8"
 uiTextGoogleFonts = "1.8.3"
 window = "1.4.0"
-koinAndroid = "3.4.0"
-koinAndroidxCompose = "3.4.6"
+koinAndroid = "4.1.0"
+koinAndroidxCompose = "4.1.0"
 lifecycleViewmodelCompose = "2.9.1"
 serialization = "1.8.1"
 glanceAppwidget = "1.1.1"
@@ -34,6 +35,11 @@ nav3Core = "1.0.0-alpha04"
 lifecycleViewmodelNav3 = "1.0.0-alpha02"
 material3AdaptiveNav3 = "1.0.0-SNAPSHOT"
 graphicsShapesAndroid = "1.0.1"
+camera = "1.5.0-beta01"
+cameraMediaEffect = "1.0.0-alpha03"
+cameraEffects = "1.4.2"
+coil = "2.7.0"
+media3 = "1.7.1"
 [libraries]
 androidx-animation = { module = "androidx.compose.animation:animation", version.ref = "animation" }
 androidx-compose-material3-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
@@ -90,7 +96,24 @@ androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", vers
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }
 androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "material3AdaptiveNav3" }
 androidx-graphics-shapes-android = { group = "androidx.graphics", name = "graphics-shapes-android", version.ref = "graphicsShapesAndroid" }
-
+#camera
+camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camera" }
+camera-compose = { group = "androidx.camera", name = "camera-compose", version.ref = "camera"}
+camera-extensions = { group = "androidx.camera", name = "camera-extensions", version.ref = "camera" }
+camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camera" }
+camera-media3-effect = { group = "androidx.camera.media3", name = "media3-effect", version.ref = "cameraMediaEffect"}
+camera-effects = { group = "androidx.camera", name = "camera-effects", version.ref = "cameraEffects"}
+camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camera" }
+camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camera" }
+#coil
+coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+#media player
+media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3" }
+media3-effect = { group = "androidx.media3", name = "media3-effect", version.ref = "media3" }
+media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+media3-transformer = { group = "androidx.media3", name = "media3-transformer", version.ref = "media3" }
+media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

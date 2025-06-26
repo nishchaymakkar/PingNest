@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.chatapp.pingnest"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -33,8 +33,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
     }
     buildFeatures {
         compose = true
@@ -104,5 +106,24 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.material3.adaptive.navigation3)
+    //camera
+    implementation(libs.camera.core)
+    implementation(libs.camera.compose)
+    implementation(libs.camera2)
+    implementation(libs.camera.effects)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
+    implementation(libs.camera.extensions)
+    implementation(libs.camera.media3.effect)
+    //coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil)
+    //media player
+    implementation(libs.media3.common)
+    implementation(libs.media3.effect)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.transformer)
+    implementation(libs.media3.ui)
+
 }
 

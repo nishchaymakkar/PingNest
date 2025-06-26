@@ -2,7 +2,8 @@ package com.chatapp.pingnest
 
 import android.app.Application
 import com.chatapp.pingnest.data.di.appModule
-import com.chatapp.pingnest.ui.viewModelModule
+import com.chatapp.pingnest.ui.photopicker.di.photoPickerModule
+import com.chatapp.pingnest.ui.screens.di.viewModelModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -14,7 +15,7 @@ class PingNestApplication: Application() {
             androidContext(this@PingNestApplication)
             androidLogger()
             modules(
-                listOf(appModule, viewModelModule)
+                listOf(appModule, viewModelModule, photoPickerModule)
             )
         }
     }
