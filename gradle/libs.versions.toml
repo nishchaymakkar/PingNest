@@ -1,4 +1,5 @@
 [versions]
+accompanist = "0.32.0"
 adaptive = "1.1.0"
 adaptiveLayout = "1.1.0"
 agp = "8.11.0"
@@ -41,6 +42,8 @@ cameraEffects = "1.4.2"
 coil = "2.7.0"
 media3 = "1.7.1"
 [libraries]
+accompanist-painter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 androidx-animation = { module = "androidx.compose.animation:animation", version.ref = "animation" }
 androidx-compose-material3-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

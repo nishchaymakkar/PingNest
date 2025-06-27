@@ -125,5 +125,9 @@ dependencies {
     implementation(libs.media3.transformer)
     implementation(libs.media3.ui)
 
+    //accompanist
+    implementation(libs.accompanist.painter)
+    implementation(libs.accompanist.permissions)
+
 }
 
