@@ -175,4 +175,3 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 ## 🤝 Contributing
 
 Feel free to submit issues, feature requests, or pull requests. All contributions are welcome!
-```
