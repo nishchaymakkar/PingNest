@@ -3,16 +3,18 @@ package com.chatapp.pingnest.data.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
+import com.chatapp.pingnest.data.NotificationHelper
 import com.chatapp.pingnest.data.di.AppModule.provideApiService
 import com.chatapp.pingnest.data.di.AppModule.provideHttpClient
 import com.chatapp.pingnest.data.di.AppModule.provideMessagingClient
+import com.chatapp.pingnest.data.di.AppModule.provideNotificationHelper
 import com.chatapp.pingnest.data.di.AppModule.provideProtoDataStore
-import com.chatapp.pingnest.data.fake.FakeMessagingClient
-import com.chatapp.pingnest.data.fake.FakePingNestApiService
 import com.chatapp.pingnest.data.local.AppSettingsSerializer
 import com.chatapp.pingnest.data.models.AppSettings
 import com.chatapp.pingnest.data.network.PingNestApiService
+import com.chatapp.pingnest.data.network.PingNestApiServiceImpl
 import com.chatapp.pingnest.data.network.RealtimeMessagingClient
+import com.chatapp.pingnest.data.network.StompMessagingClient
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
@@ -51,18 +53,22 @@ object AppModule {
     }
 
     fun provideApiService(client: HttpClient): PingNestApiService {
-        return FakePingNestApiService()
+        return PingNestApiServiceImpl(client)
+    }
+    fun provideNotificationHelper(context: Context): NotificationHelper {
+        return NotificationHelper(context)
     }
 
-    fun provideMessagingClient(): RealtimeMessagingClient {
-        return FakeMessagingClient()
+    fun provideMessagingClient(notificationHelper: NotificationHelper): RealtimeMessagingClient {
+        return StompMessagingClient(notificationHelper)
     }
 }
 
 
 val appModule = module {
     single { provideHttpClient() }
-    single { provideMessagingClient() }
+    single { provideMessagingClient(get()) }
     single { provideApiService(get()) }
     single { provideProtoDataStore(androidContext()) }
+    single { provideNotificationHelper(androidContext()) }
 }
