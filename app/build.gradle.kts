@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.chatapp.pingnest"
-        minSdk = 26
+        minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -40,6 +40,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
 }
 
@@ -57,6 +58,11 @@ dependencies {
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.graphics.shapes.android)
+    implementation(libs.material)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -74,6 +80,7 @@ dependencies {
     implementation (libs.androidx.adaptive.navigation)
     implementation (libs.androidx.material3.window.size.class1)
     implementation (libs.androidx.animation)
+    implementation(libs.concurrent.kts)
 
     //serialization
     implementation(libs.kotlinx.serialization.json)
