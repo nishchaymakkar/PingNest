@@ -445,8 +445,8 @@ fun ShutterButton(
                     shape = RectangleShape,
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                     modifier = Modifier
-                        .height(75.dp)
-                        .width(75.dp)){}
+                        .height(50.dp)
+                        .width(50.dp)){}
                 Spacer(modifier = Modifier.width(100.dp))
             }
         }
