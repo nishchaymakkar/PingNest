@@ -2,13 +2,15 @@
 
 package com.chatapp.pingnest.ui
 
-
 import android.util.Log
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -27,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
@@ -35,23 +38,32 @@ import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import com.chatapp.pingnest.R
-import com.chatapp.pingnest.data.models.User
+import com.chatapp.pingnest.ui.camera.Camera
+import com.chatapp.pingnest.ui.camera.Media
+import com.chatapp.pingnest.ui.camera.MediaType
+import com.chatapp.pingnest.ui.navigation.CameraScreen
+import com.chatapp.pingnest.ui.navigation.ChatRoom
+import com.chatapp.pingnest.ui.navigation.HomeScreen
+import com.chatapp.pingnest.ui.navigation.NavigationBarItem
+import com.chatapp.pingnest.ui.navigation.PhotoPicker
+import com.chatapp.pingnest.ui.navigation.Settings
+import com.chatapp.pingnest.ui.navigation.VideoEditor
+import com.chatapp.pingnest.ui.photopicker.PhotoPicker
 import com.chatapp.pingnest.ui.screens.chatroom.ChatRoom
-import com.chatapp.pingnest.ui.screens.homescreen.HomeScreen
-import kotlinx.serialization.Serializable
+import com.chatapp.pingnest.ui.screens.homescreen.ChatsListScreen
+import com.chatapp.pingnest.ui.screens.homescreen.HomeNavGraph
+import com.chatapp.pingnest.ui.screens.settings.SettingsNavigation
+import com.chatapp.pingnest.ui.videoedit.VideoEditScreen
 
 
-@Serializable
-data object HomeScreen : NavKey
-@Serializable
-data class ChatRoom(val user: User) : NavKey
-
+@UnstableApi
 @Composable
 fun PingNestApp(
     modifier: Modifier = Modifier,
     viewModel: PingNestViewModel
 ) {
-    val backStack = rememberNavBackStack(HomeScreen)
+
+    val backStack = rememberNavBackStack(NavigationBarItem.ChatList)
     val listAndDetail = rememberListDetailSceneStrategy<NavKey>(
         backNavigationBehavior = BackNavigationBehavior.PopUntilCurrentDestinationChange,
         directive = calculatePaneScaffoldDirective(
@@ -59,12 +71,14 @@ fun PingNestApp(
             verticalHingePolicy = HingePolicy.NeverAvoid
         )
     )
+
     val users by viewModel.users.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val messages by viewModel.messages.collectAsStateWithLifecycle()
-    val senderName by viewModel.userNickname.collectAsStateWithLifecycle()
+    val senderName by viewModel.userNickname.collectAsStateWithLifecycle(initialValue = "")
 
     NavDisplay(
+        modifier = modifier.windowInsetsPadding(WindowInsets.displayCutout),
         backStack = backStack,
         sceneStrategy = listAndDetail,
         entryDecorators = listOf(
@@ -73,6 +87,22 @@ fun PingNestApp(
             rememberViewModelStoreNavEntryDecorator()
         ),
         entryProvider = entryProvider {
+            entry<NavigationBarItem.ChatList>{
+                HomeNavGraph(
+                    onSettingsClicked = {
+                        backStack.add(Settings.SettingsScreen)
+                    },
+                    onChatClicked = { user->
+                        val last = backStack.lastOrNull()
+                        if (last is ChatRoom) {
+                            backStack[backStack.lastIndex] = ChatRoom(user)
+                        } else {
+                            backStack.add(ChatRoom(user))
+                        }
+                    },
+                    viewModel = viewModel
+                )
+            }
             entry(HomeScreen,
                 metadata = ListDetailSceneStrategy.listPane(
                     detailPlaceholder = {
@@ -86,7 +116,7 @@ fun PingNestApp(
                         }
 
                     }))  {
-                HomeScreen(
+                ChatsListScreen(
                     isLoading = isLoading,
                     users = users,
                     onChatClicked = { index, user ->
@@ -103,9 +133,7 @@ fun PingNestApp(
                             backStack.add(ChatRoom(user))
                         }
                     },
-                    onLogOut = {
-                        viewModel.logout()
-                    },
+                    onSettingsClicked = {backStack.add(Settings.SettingsScreen)},
                     sender = senderName.toString()
                 )
             }
@@ -125,9 +153,54 @@ fun PingNestApp(
                         )
                     },
                     onMessageChange = viewModel::onMessageChange,
-                    sender = senderName.toString()
+                    sender = senderName.toString(),
+                    onCameraClicked = {backStack.add(CameraScreen(args.user))},
+                    onPhotoPickerClicked = {backStack.add(PhotoPicker)}
+                    )
+
+            }
+            entry(PhotoPicker) {
+                PhotoPicker(
+                    onPhotoPicked = { backStack.removeLastOrNull() }
+                )
+            }
+            entry<CameraScreen>{ args->
+               Camera(
+                   onMediaCaptured = { capturedMedia: Media? ->
+                       when(capturedMedia?.mediaType){
+                           MediaType.PHOTO -> {
+                               backStack.removeLastOrNull()
+                           }
+                           MediaType.VIDEO -> {
+                               backStack.add(VideoEditor(args.user,capturedMedia.uri.toString()))
+                           }
+                           else -> {
+                               backStack.removeLastOrNull()
+                           }
+                       }
+
+                   }
+               )
+            }
+            entry<VideoEditor>{args ->
+                VideoEditScreen(
+                    uri = args.uri,
+                    onCloseButtonClicked = {backStack.removeLastOrNull()},
+                    onSendButtonClicked = {
+                        backStack.removeRange(
+                            backStack.size - 2,
+                            backStack.size
+                        )
+                    },
                 )
 
+            }
+            entry(Settings.SettingsScreen) {
+               SettingsNavigation(
+                   onNavBackClicked = {
+                       backStack.removeLastOrNull()
+                   },
+               )
             }
 
         },
