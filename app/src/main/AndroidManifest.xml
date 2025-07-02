@@ -46,6 +46,7 @@
             android:allowEmbedded="true"
             android:documentLaunchMode="always"
             android:resizeableActivity="true"
+            android:launchMode="singleTop"
             />
 
         <receiver
