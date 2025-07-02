@@ -5,29 +5,31 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.OptIn
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.common.util.UnstableApi
+import com.chatapp.pingnest.data.models.AppTheme
 import com.chatapp.pingnest.data.models.Status
 import com.chatapp.pingnest.data.models.User
 import com.chatapp.pingnest.ui.PingNestApp
 import com.chatapp.pingnest.ui.PingNestViewModel
-//import com.chatapp.pingnest.ui.screens.UserListAndChatRoom
 import com.chatapp.pingnest.ui.theme.PingNestTheme
-import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
 class PingNestActivity : ComponentActivity() {
 
+    @OptIn(UnstableApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             val viewModel = koinViewModel<PingNestViewModel>()
-
+            val savedTheme = viewModel.themeFlow.collectAsStateWithLifecycle(initialValue = AppTheme.SYSTEM_DEFAULT).value
             val state = viewModel.state
             val isUserPresent by viewModel.isUserPresent.collectAsStateWithLifecycle()
             LaunchedEffect(
@@ -35,7 +37,13 @@ class PingNestActivity : ComponentActivity() {
             ) {
                 viewModel.connect()
             }
-            PingNestTheme {
+            PingNestTheme(
+                darkTheme = when(savedTheme){
+                    AppTheme.LIGHT -> false
+                    AppTheme.DARK -> true
+                    AppTheme.SYSTEM_DEFAULT -> isSystemInDarkTheme()
+                }
+            ) {
                 Surface {
                     if (isUserPresent){
                         viewModel.userPresent()
@@ -69,9 +77,6 @@ class PingNestActivity : ComponentActivity() {
                     PingNestApp(
                         viewModel = viewModel
                     )
-//                    UserListAndChatRoom(
-//                        viewModel = viewModel
-//                    )
                 }
                 }
             }
