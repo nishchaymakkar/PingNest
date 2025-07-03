@@ -148,6 +148,7 @@ fun VideoEditScreen(
         topBar = {
             VideoEditTopAppBar(
                 onSendButtonClicked = {
+
                     viewModel.applyVideoTransformation(
                         context = context,
                         videoUri = uri,
@@ -160,6 +161,7 @@ fun VideoEditScreen(
                         textOverlayLargeSelected = largeOverlayTextEnabled,
 
                         )
+                    onSendButtonClicked()
                 },
                 onCloseButtonClicked = onCloseButtonClicked,
                 onMuteClicked = { removeAudioEnabled = !removeAudioEnabled},
