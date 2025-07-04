@@ -137,7 +137,8 @@ Ktor Client (HTTP/WS/STOMP)
 
 ## Screen Shots
 <img src="https://github.com/user-attachments/assets/e7b02c69-4541-4042-8227-424a405c97b8" width="200" alt="Enter Chatroom Dialog" />
-<img src="https://github.com/user-attachments/assets/4ce0ae26-1f20-4876-a86c-aebd4b447d74" width="200" alt="Home Screen" />
+<img src="https://github.com/user-attachments/assets/8732f1ae-865c-4876-8b26-65831feccf53" width="200" alt="Chat List" />
+<img src="https://github.com/user-attachments/assets/6718775a-79ab-4300-bc91-cd76ea5cddae" width="200" alt="Timeline"/>
 <img src="https://github.com/user-attachments/assets/46ddb6bc-a01a-4cd1-b305-4229a99a7621" width="200" alt="Chat Room" />
 <img src="https://github.com/user-attachments/assets/8d26ae71-2c29-40c0-be39-20003cbe1911" width="200" alt="Camera Screen" />
 <img src="https://github.com/user-attachments/assets/dd99b634-9ced-40ed-b63c-5a220be01c82" width="200" alt ="Edit Video Screen"/>
