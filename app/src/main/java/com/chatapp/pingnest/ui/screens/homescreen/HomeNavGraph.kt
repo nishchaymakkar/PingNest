@@ -10,10 +10,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entry
@@ -46,8 +50,22 @@ import com.chatapp.pingnest.ui.components.FunctionalityNotAvailablePopup
 import com.chatapp.pingnest.ui.navigation.BottomBarScreenSaver
 import com.chatapp.pingnest.ui.navigation.NavigationBarItem
 import com.chatapp.pingnest.ui.navigation.bottomBarItems
-import com.chatapp.pingnest.ui.screens.timeline.TimelineScreen
+import com.chatapp.pingnest.ui.screens.homescreen.chatlist.ChatsListScreen
+import com.chatapp.pingnest.ui.screens.homescreen.timeline.TimelineScreen
+import com.chatapp.pingnest.ui.theme.PingNestTheme
+import org.koin.androidx.compose.koinViewModel
 
+@Preview
+@Composable
+private fun HomeNavGraphPreview() {
+    PingNestTheme {
+        HomeNavGraph(
+            onSettingsClicked = {},
+            viewModel = koinViewModel(),
+            onChatClicked = {}
+        )
+    }
+}
 @Composable
 fun HomeNavGraph(
     onSettingsClicked: () -> Unit,
@@ -82,11 +100,28 @@ fun HomeNavGraph(
                     NavigationBarItem(
                         selected = isSelected,
                         icon = {
-                            Icon(
-                               painter = if (isSelected) painterResource( screen.selectedIcon) else painterResource(screen.unSelectedIcon),
+                            BadgedBox(
+                                badge = {
+                                    if (screen == NavigationBarItem.ChatList){
+                                        if (screen.badgeCount != null){
+                                        Badge(
+                                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                        ) {
+
+                                                Text("${screen.badgeCount}")
+                                            }
+
+                                        }
+                                    }
+                                }
+                            ) { Icon(
+                                painter = if (isSelected) painterResource( screen.selectedIcon) else painterResource(screen.unSelectedIcon),
                                 contentDescription = null,
                                 tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(.7f)
                             )
+                            }
+
 
                         },
                         label = {
@@ -107,7 +142,7 @@ fun HomeNavGraph(
                             }
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = .2f),
+                            indicatorColor = MaterialTheme.colorScheme.primary.copy(.3f),
                         )
                     )
                 }
@@ -115,16 +150,19 @@ fun HomeNavGraph(
 
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {popUp = !popUp},
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.Message,
-                    contentDescription = null
-                )
+            if (currentScreen == NavigationBarItem.ChatList){
+                FloatingActionButton(
+                    onClick = {popUp = !popUp},
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.Message,
+                        contentDescription = null
+                    )
+                }
             }
+
         }
     ) { innerPadding ->
         if (popUp){
@@ -141,14 +179,14 @@ fun HomeNavGraph(
                         users = users,
                         onChatClicked = { index, user ->
                             viewModel.getMessages(
-                                senderId = senderName ?: "unknown",
+                                senderId = senderName,
                                 recipientId = user.nickName
                             )
                             onChatClicked(user)
 
                         },
                         onSettingsClicked = onSettingsClicked,
-                        sender = senderName.toString()
+                        sender = senderName
                     )
                 }
                 entry<NavigationBarItem.TimeLine> {
