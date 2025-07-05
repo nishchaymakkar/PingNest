@@ -52,31 +52,43 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.chatapp.pingnest.data.models.AppTheme
 import com.chatapp.pingnest.data.models.ChatMessage
+import com.chatapp.pingnest.data.models.ChatThemeType
+import com.chatapp.pingnest.data.models.ChatWallpaperType
 import com.chatapp.pingnest.data.models.Status
 import com.chatapp.pingnest.data.models.User
+import com.chatapp.pingnest.ui.components.FunctionalityNotAvailablePopup
 import com.chatapp.pingnest.ui.components.JumpToBottom
 import com.chatapp.pingnest.ui.components.InputBar
 import com.chatapp.pingnest.ui.components.ProfileIcon
+import com.chatapp.pingnest.ui.wallpapers.CircleWallpaper
+import com.chatapp.pingnest.ui.wallpapers.CurveWallpaper
+import com.chatapp.pingnest.ui.wallpapers.DoodleBackground
+import com.chatapp.pingnest.ui.wallpapers.PolygonWallpaper
+import com.chatapp.pingnest.ui.wallpapers.StarWallpaper
 import com.chatapp.pingnest.ui.conversation.SymbolAnnotationType
+import com.chatapp.pingnest.ui.wallpapers.WaveWallpaper
 import com.chatapp.pingnest.ui.conversation.messageFormatter
+import com.chatapp.pingnest.ui.screens.settings.toChatTheme
 import com.chatapp.pingnest.ui.theme.PingNestTheme
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-@Preview( showSystemUi = true)
+@Preview
 @Composable
 private fun ChatRoomPrev() {
     var text by remember {  mutableStateOf("")}
@@ -99,7 +111,9 @@ private fun ChatRoomPrev() {
             ),
             onNavIconPressed = {},
             onSend = { },
-            onMessageChange = { text = it}
+            onMessageChange = { text = it},
+            onPhotoPickerClicked = {},
+            onCameraClicked = {}
         )
     }
 }
@@ -113,11 +127,17 @@ fun ChatRoom(
     messages: List<ChatMessage>,
     onNavIconPressed: () -> Unit,
     onSend: ()-> Unit,
-    onMessageChange: (String) -> Unit
+    onMessageChange: (String) -> Unit,
+    onPhotoPickerClicked: ()-> Unit,
+    onCameraClicked:()-> Unit,
+    viewModel: ChatRoomViewModel = koinViewModel()
 ) {
-
-
-    if(user != null) {
+    val chatThemeType by viewModel.chatThemeFlow.collectAsStateWithLifecycle(initialValue = ChatThemeType.EMERALD_GREEN)
+    val colorScheme = MaterialTheme.colorScheme
+    val themeColors = chatThemeType.toChatTheme(colorScheme)
+    val chatWallpaperType by viewModel.wallpaperFlow.collectAsStateWithLifecycle(ChatWallpaperType.DEFAULT)
+    var popUp by remember { mutableStateOf(false) }
+    if (user != null) {
         Scaffold(
             topBar = {
                 ChatNameBar(
@@ -129,21 +149,37 @@ fun ChatRoom(
             },
             bottomBar = {
                 InputBar(
-                    modifier = Modifier
-                        .padding(bottom = 8.dp),
+                    modifier = Modifier,
                     onSendMessage = {
                         onMessageChange(it.text)
-                        onSend() },
-                    onCameraClick = {},
-                    onGalleryClick = {}
+                        onSend()
+                    },
+                    onCameraClick = onCameraClicked,
+                    onGalleryClick = onPhotoPickerClicked,
+                    primaryColor = themeColors.chatBubbleColorLocalUser
                 )
             }
 
         ) { innerPadding ->
-
+            Box(
+                Modifier.fillMaxSize().padding(innerPadding)
+                    .background(themeColors.background)
+            ) {
+                if (popUp){
+                    FunctionalityNotAvailablePopup(onDismiss = {popUp = !popUp})
+                }
+                when (chatWallpaperType) {
+                    ChatWallpaperType.DEFAULT -> DoodleBackground()
+                    ChatWallpaperType.CIRCLE -> CircleWallpaper()
+                    ChatWallpaperType.STAR -> StarWallpaper()
+                    ChatWallpaperType.CURVES -> CurveWallpaper()
+                    ChatWallpaperType.WAVE -> WaveWallpaper()
+                    ChatWallpaperType.POLYGON -> PolygonWallpaper()
+                }
                 Column(
-                    modifier = modifier .fillMaxSize()
-                        .padding(innerPadding).background(MaterialTheme.colorScheme.background)
+                    modifier = modifier
+                        .fillMaxSize()
+
                 ) {
 
                     Messages(
@@ -152,7 +188,9 @@ fun ChatRoom(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f),
-                        sender = sender
+                        sender = sender,
+                        senderBubble = themeColors.chatBubbleColorLocalUser,
+                        recipientBubble = themeColors.chatBubbleColorRemoteUser
                     )
 
 
@@ -163,6 +201,7 @@ fun ChatRoom(
         }
 
 
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -231,6 +270,8 @@ private fun Messages(
     scrollState: LazyListState,
     modifier: Modifier = Modifier,
     sender: String,
+    senderBubble: Color,
+    recipientBubble: Color
 ) {
     val scope = rememberCoroutineScope()
 
@@ -263,25 +304,27 @@ private fun Messages(
                     ChatItemBubble(
                         message = message,
                         isUserMe = isUserMe,
-                        authorClicked = {}
+                        authorClicked = {},
+                        senderBubble = senderBubble,
+                        recipientBubble = recipientBubble
                     )
 
                 }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp, horizontal = 8.dp),
-                        horizontalArrangement = if (isUserMe) Arrangement.End else Arrangement.Start
-                    ) {
-
-                            Text(
-                                text = message.timestamp.toFormattedTime(),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = LocalContentColor.current,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-
-                    }
+//                    Row(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(vertical = 2.dp, horizontal = 8.dp),
+//                        horizontalArrangement = if (isUserMe) Arrangement.End else Arrangement.Start
+//                    ) {
+//
+//                            Text(
+//                                text = message.timestamp.toFormattedTime(),
+//                                style = MaterialTheme.typography.bodySmall,
+//                                color = LocalContentColor.current,
+//                                fontWeight = FontWeight.ExtraBold
+//                            )
+//
+//                    }
 
 
 
@@ -346,12 +389,12 @@ private fun ChatRoomAppBar(
 }
 
 @Composable
-fun ChatItemBubble(message: ChatMessage, isUserMe: Boolean, authorClicked: (String) -> Unit) {
+fun ChatItemBubble(message: ChatMessage, senderBubble: Color, recipientBubble: Color, isUserMe: Boolean, authorClicked: (String) -> Unit) {
 
     val backgroundBubbleColor = if (isUserMe) {
-        MaterialTheme.colorScheme.primary
+        senderBubble
     } else {
-        MaterialTheme.colorScheme.surfaceContainer
+        recipientBubble
     }
 
     val chatBubbleShape = if (isUserMe){
@@ -364,9 +407,10 @@ fun ChatItemBubble(message: ChatMessage, isUserMe: Boolean, authorClicked: (Stri
 
     Card(
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 5.dp
+//            defaultElevation = 5.dp
         ),
-        modifier = Modifier.shadow(10.dp,chatBubbleShape),
+        modifier = Modifier,
+//            .shadow(10.dp,chatBubbleShape),
         shape = chatBubbleShape
     ) {
         Surface(
@@ -462,7 +506,7 @@ fun DayHeader(dayString: String) {
             text = dayString,
             modifier = Modifier.padding(horizontal = 16.dp),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.inverseSurface,
         )
         DayHeaderLine()
     }

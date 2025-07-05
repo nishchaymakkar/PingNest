@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.chatapp.pingnest.ui.screens.homescreen
+package com.chatapp.pingnest.ui.screens.homescreen.chatlist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures

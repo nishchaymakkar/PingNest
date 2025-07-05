@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -22,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterStart
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -50,33 +52,25 @@ fun DrawerItemHeader(text: String) {
 }
 
 @Composable
-fun ChatItem(nickname: String, fullname: String, selected: Boolean, status: Status?, onChatClicked: () -> Unit) {
+fun ChatItem(modifier: Modifier,nickname: String, fullname: String, selected: Boolean, status: Status?) {
     val background = if (selected) {
-        Modifier.background(MaterialTheme.colorScheme.primaryContainer)
+        MaterialTheme.colorScheme.background
     } else {
-        Modifier
+        MaterialTheme.colorScheme.surface
     }
     Row(
-        modifier = Modifier
-            .height(72.dp)  // Increased height for better spacing
+        modifier = modifier
+            .height(72.dp)
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 4.dp)  // Added vertical padding
-            .clip(MaterialTheme.shapes.medium)  // Using medium shape instead of circle
-            .background(MaterialTheme.colorScheme.surface)
-            .border(  // Added conditional border
-                width = 1.dp,
-                color = if (selected) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
-                shape = MaterialTheme.shapes.medium
-            )
-            .clickable(onClick = onChatClicked),
+            .padding(horizontal = 8.dp)
+            .background(background),
         verticalAlignment = CenterVertically,
     ) {
         Box {
             ProfileIcon(
-                size = 48.dp,  // Slightly larger profile icon
+                size = 48.dp,
                 name = fullname,
-                modifier = Modifier.padding(start = 12.dp)
+                modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
             )
             // Enhanced status indicator
             if (status == Status.ONLINE) {
@@ -91,11 +85,21 @@ fun ChatItem(nickname: String, fullname: String, selected: Boolean, status: Stat
                         .border(1.5.dp, MaterialTheme.colorScheme.surface, CircleShape)
                 )
             }
+            // ✅ Tick icon if selected
+            if (selected) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Selected",
+                    modifier = Modifier
+                        .size(20.dp)
+                        .offset(x = 40.dp, y = 36.dp), // Position below profile
+                    tint = MaterialTheme.colorScheme.primaryContainer
+                )
+            }
         }
         Column(
-            modifier = Modifier
-                .padding(start = 16.dp, end = 12.dp)
-                .weight(1f)  // Take remaining space
+            modifier = Modifier,
+            horizontalAlignment = Alignment.Start
         ) {
             Text(
                 text = fullname,
