@@ -69,7 +69,7 @@ fun TimelineScreen(
     val player = viewModel.player
     val videoRatio = viewModel.videoRatio
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
         contentAlignment = Alignment.Center
     ){
         if (media.isEmpty()){
@@ -134,7 +134,7 @@ fun TimelineVerticalPager(
                 .fillMaxSize()
                 .padding(8.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .graphicsLayer {
                     val pagerOffset = (
                             (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction ).absoluteValue
