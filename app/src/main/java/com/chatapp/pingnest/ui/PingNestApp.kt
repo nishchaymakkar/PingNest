@@ -50,7 +50,7 @@ import com.chatapp.pingnest.ui.navigation.Settings
 import com.chatapp.pingnest.ui.navigation.VideoEditor
 import com.chatapp.pingnest.ui.photopicker.PhotoPicker
 import com.chatapp.pingnest.ui.screens.chatroom.ChatRoom
-import com.chatapp.pingnest.ui.screens.homescreen.ChatsListScreen
+import com.chatapp.pingnest.ui.screens.homescreen.chatlist.ChatsListScreen
 import com.chatapp.pingnest.ui.screens.homescreen.HomeNavGraph
 import com.chatapp.pingnest.ui.screens.settings.SettingsNavigation
 import com.chatapp.pingnest.ui.videoedit.VideoEditScreen
@@ -72,8 +72,7 @@ fun PingNestApp(
         )
     )
 
-    val users by viewModel.users.collectAsStateWithLifecycle()
-    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+
     val messages by viewModel.messages.collectAsStateWithLifecycle()
     val senderName by viewModel.userNickname.collectAsStateWithLifecycle(initialValue = "")
 
@@ -87,7 +86,18 @@ fun PingNestApp(
             rememberViewModelStoreNavEntryDecorator()
         ),
         entryProvider = entryProvider {
-            entry<NavigationBarItem.ChatList>{
+            entry<NavigationBarItem.ChatList>(  metadata = ListDetailSceneStrategy.listPane(
+                detailPlaceholder = {
+                    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                        Text(
+                            text = stringResource(R.string.app_name),
+                            style = MaterialTheme.typography.displaySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                })){
                 HomeNavGraph(
                     onSettingsClicked = {
                         backStack.add(Settings.SettingsScreen)
@@ -101,40 +111,6 @@ fun PingNestApp(
                         }
                     },
                     viewModel = viewModel
-                )
-            }
-            entry(HomeScreen,
-                metadata = ListDetailSceneStrategy.listPane(
-                    detailPlaceholder = {
-                        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                            Text(
-                                text = stringResource(R.string.app_name),
-                                style = MaterialTheme.typography.displaySmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold
-                                )
-                        }
-
-                    }))  {
-                ChatsListScreen(
-                    isLoading = isLoading,
-                    users = users,
-                    onChatClicked = { index, user ->
-                        Log.d("HomeScreen", "Chat clicked with user: ${user.nickName}")
-                        viewModel.getMessages(
-                            senderId = senderName ?: "unknown",
-                            recipientId = user.nickName
-                        )
-                        backStack.add(ChatRoom(user))
-                        val last = backStack.lastOrNull()
-                        if (last is ChatRoom) {
-                            backStack[backStack.lastIndex] = ChatRoom(user)
-                        } else {
-                            backStack.add(ChatRoom(user))
-                        }
-                    },
-                    onSettingsClicked = {backStack.add(Settings.SettingsScreen)},
-                    sender = senderName.toString()
                 )
             }
             entry<ChatRoom>(
