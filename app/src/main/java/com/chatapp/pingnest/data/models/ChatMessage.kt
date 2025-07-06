@@ -5,6 +5,8 @@ data class ChatMessage(
     val chatId: String? = null,
     val senderId: String,
     val recipientId: String,
-    val content: String,
+    val text: String,
+    val mediaUri: String? = null,
+    val mediaMimeType: String? = null,
     val timestamp: String
 )
