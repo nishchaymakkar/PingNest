@@ -3,8 +3,14 @@
 package com.chatapp.pingnest.ui.screens.chatroom
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
+import android.net.Uri
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,17 +22,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -48,12 +57,17 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextLayoutResult
@@ -62,7 +76,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.chatapp.pingnest.data.models.AppTheme
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.chatapp.pingnest.data.models.ChatMessage
 import com.chatapp.pingnest.data.models.ChatThemeType
 import com.chatapp.pingnest.data.models.ChatWallpaperType
@@ -82,7 +97,9 @@ import com.chatapp.pingnest.ui.wallpapers.WaveWallpaper
 import com.chatapp.pingnest.ui.conversation.messageFormatter
 import com.chatapp.pingnest.ui.screens.settings.toChatTheme
 import com.chatapp.pingnest.ui.theme.PingNestTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -98,22 +115,23 @@ private fun ChatRoomPrev() {
             user = User(nickName = "testuser" , fullName = "Test User", status = Status.ONLINE),
             sender = "testuser",
             messages = listOf(
-                ChatMessage(senderId = "testuser", content = "Hello!", recipientId = "otheruser", timestamp = "2024-03-15 10:00:00"),
-                ChatMessage(senderId = "otheruser", content = "Hi there!",recipientId = "otheruser", timestamp = "2024-03-15 10:01:00"),
-                ChatMessage(senderId = "testuser", content = "How are you doing?",recipientId = "otheruser", timestamp = "2024-03-15 10:02:00"),
-                ChatMessage(senderId = "otheruser", content = "I'm good, thanks! How about you?", recipientId = "otheruser",timestamp = "2024-03-15 10:03:00"),
-                ChatMessage(senderId = "testuser", content = "Doing well. Just working on this chat app.",recipientId = "otheruser", timestamp = "2024-03-15 10:04:00"),
-                ChatMessage(senderId = "otheruser", content = "Oh cool! Sounds interesting.",recipientId = "otheruser", timestamp = "2024-03-15 10:05:00"),
-                ChatMessage(senderId = "testuser", content = "Yeah, it's a fun project.", recipientId = "otheruser",timestamp = "2024-03-16 11:00:00"),
-                ChatMessage(senderId = "otheruser", content = "I can imagine. Keep up the good work!",recipientId = "otheruser", timestamp = "2024-03-16 11:01:00"),
-                ChatMessage(senderId = "testuser", content = "Thanks! Will do. https://www.google.com",recipientId = "otheruser", timestamp = "2024-03-16 11:02:00"),
-                ChatMessage(senderId = "otheruser", content = "Let me know if you need any help @testuser",recipientId = "otheruser", timestamp = "2024-03-16 11:03:00")
+                ChatMessage(senderId = "testuser", text = "Hello!", recipientId = "otheruser", timestamp = "2024-03-15 10:00:00"),
+                ChatMessage(senderId = "otheruser", text = "Hi there!",recipientId = "otheruser", timestamp = "2024-03-15 10:01:00"),
+                ChatMessage(senderId = "testuser", text = "How are you doing?",recipientId = "otheruser", timestamp = "2024-03-15 10:02:00"),
+                ChatMessage(senderId = "otheruser", text = "I'm good, thanks! How about you?", recipientId = "otheruser",timestamp = "2024-03-15 10:03:00"),
+                ChatMessage(senderId = "testuser", text = "Doing well. Just working on this chat app.",recipientId = "otheruser", timestamp = "2024-03-15 10:04:00"),
+                ChatMessage(senderId = "otheruser", text = "Oh cool! Sounds interesting.",recipientId = "otheruser", timestamp = "2024-03-15 10:05:00"),
+                ChatMessage(senderId = "testuser", text = "Yeah, it's a fun project.", recipientId = "otheruser",timestamp = "2024-03-16 11:00:00"),
+                ChatMessage(senderId = "otheruser", text = "I can imagine. Keep up the good work!",recipientId = "otheruser", timestamp = "2024-03-16 11:01:00"),
+                ChatMessage(senderId = "testuser", text = "Thanks! Will do. https://www.google.com",recipientId = "otheruser", timestamp = "2024-03-16 11:02:00"),
+                ChatMessage(senderId = "otheruser", text = "Let me know if you need any help @testuser",recipientId = "otheruser", timestamp = "2024-03-16 11:03:00")
             ),
             onNavIconPressed = {},
             onSend = { },
             onMessageChange = { text = it},
             onPhotoPickerClicked = {},
-            onCameraClicked = {}
+            onCameraClicked = {},
+            onVideoClicked = {}
         )
     }
 }
@@ -129,6 +147,7 @@ fun ChatRoom(
     onSend: ()-> Unit,
     onMessageChange: (String) -> Unit,
     onPhotoPickerClicked: ()-> Unit,
+    onVideoClicked: (String) -> Unit,
     onCameraClicked:()-> Unit,
     viewModel: ChatRoomViewModel = koinViewModel()
 ) {
@@ -190,7 +209,8 @@ fun ChatRoom(
                             .weight(1f),
                         sender = sender,
                         senderBubble = themeColors.chatBubbleColorLocalUser,
-                        recipientBubble = themeColors.chatBubbleColorRemoteUser
+                        recipientBubble = themeColors.chatBubbleColorRemoteUser,
+                        onVideoClicked = onVideoClicked
                     )
 
 
@@ -262,6 +282,31 @@ private fun ChatNameBar(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ChatRoomAppBar(
+    modifier: Modifier = Modifier,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+    onNavIconPressed: () -> Unit = { },
+    title: @Composable () -> Unit,
+    actions: @Composable RowScope.() -> Unit = {},
+) {
+    CenterAlignedTopAppBar(
+        modifier = modifier,
+        actions = actions,
+        title = title,
+        scrollBehavior = scrollBehavior,
+        navigationIcon = {
+            IconButton(
+                onClick = onNavIconPressed
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null
+                )}
+        },
+    )
+}
 
 
 @Composable
@@ -271,7 +316,8 @@ private fun Messages(
     modifier: Modifier = Modifier,
     sender: String,
     senderBubble: Color,
-    recipientBubble: Color
+    recipientBubble: Color,
+    onVideoClicked: (String) -> Unit
 ) {
     val scope = rememberCoroutineScope()
 
@@ -306,7 +352,8 @@ private fun Messages(
                         isUserMe = isUserMe,
                         authorClicked = {},
                         senderBubble = senderBubble,
-                        recipientBubble = recipientBubble
+                        recipientBubble = recipientBubble,
+                        onVideoClicked = onVideoClicked
                     )
 
                 }
@@ -362,34 +409,15 @@ private fun Messages(
 
 private val JumpToBottomThreshold = 56.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ChatRoomAppBar(
-    modifier: Modifier = Modifier,
-    scrollBehavior: TopAppBarScrollBehavior? = null,
-    onNavIconPressed: () -> Unit = { },
-    title: @Composable () -> Unit,
-    actions: @Composable RowScope.() -> Unit = {},
-) {
-    CenterAlignedTopAppBar(
-        modifier = modifier,
-        actions = actions,
-        title = title,
-        scrollBehavior = scrollBehavior,
-        navigationIcon = {
-            IconButton(
-                onClick = onNavIconPressed
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null
-                )}
-        },
-    )
-}
 
 @Composable
-fun ChatItemBubble(message: ChatMessage, senderBubble: Color, recipientBubble: Color, isUserMe: Boolean, authorClicked: (String) -> Unit) {
+private fun ChatItemBubble(
+    message: ChatMessage,
+    senderBubble: Color,
+    recipientBubble: Color,
+    isUserMe: Boolean,
+    authorClicked: (String) -> Unit,
+    onVideoClicked: (String) -> Unit) {
 
     val backgroundBubbleColor = if (isUserMe) {
         senderBubble
@@ -423,6 +451,7 @@ fun ChatItemBubble(message: ChatMessage, senderBubble: Color, recipientBubble: C
                     message = message,
                     isUserMe = isUserMe,
                     authorClicked = authorClicked,
+                    onVideoClicked = onVideoClicked
                 )
 
 
@@ -450,52 +479,136 @@ fun ChatItemBubble(message: ChatMessage, senderBubble: Color, recipientBubble: C
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
-fun ClickableMessage( message: ChatMessage, isUserMe: Boolean, authorClicked: (String) -> Unit) {
+private fun ClickableMessage(
+    message: ChatMessage,
+    isUserMe: Boolean,
+    authorClicked: (String) -> Unit,
+    onVideoClicked: (uri: String)-> Unit
+) {
     val uriHandler = LocalUriHandler.current
     var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     val activity = LocalActivity.current
+    val context = LocalContext.current
     val windowSize = activity?.let { calculateWindowSizeClass(it) }
     val styledMessage = messageFormatter(
-        text = message.content,
+        text = message.text,
         primary = isUserMe,
     )
     val messageBubbleWidth = if (windowSize?.widthSizeClass == WindowWidthSizeClass.Compact) 240.dp else 480.dp
 
+    Column {
 
-    BasicText(
-        text = styledMessage,
-        modifier = Modifier
-            .padding(16.dp)
-            .widthIn(max = messageBubbleWidth)
-            .pointerInput(Unit) {
-                detectTapGestures { offset ->
-                    layoutResult?.let { layout ->
-                        val position = layout.getOffsetForPosition(offset)
-                        styledMessage.getStringAnnotations(start = position, end = position)
-                            .firstOrNull()?.let { annotation ->
-                                when (annotation.tag) {
-                                    SymbolAnnotationType.LINK.name -> uriHandler.openUri(annotation.item)
-                                    SymbolAnnotationType.PERSON.name -> authorClicked(annotation.item)
+        BasicText(
+            text = styledMessage,
+            modifier = Modifier
+                .padding(16.dp)
+                .widthIn(max = messageBubbleWidth)
+                .pointerInput(Unit) {
+                    detectTapGestures { offset ->
+                        layoutResult?.let { layout ->
+                            val position = layout.getOffsetForPosition(offset)
+                            styledMessage.getStringAnnotations(start = position, end = position)
+                                .firstOrNull()?.let { annotation ->
+                                    when (annotation.tag) {
+                                        SymbolAnnotationType.LINK.name -> uriHandler.openUri(
+                                            annotation.item
+                                        )
+
+                                        SymbolAnnotationType.PERSON.name -> authorClicked(annotation.item)
+                                    }
                                 }
-                            }
+                        }
+                    }
+                },
+            onTextLayout = { layoutResult = it },
+            style = MaterialTheme.typography.bodyLarge.copy(
+                color = LocalContentColor.current,
+                fontSize = 16.sp
+            ),
+            maxLines = Int.MAX_VALUE,
+            overflow = TextOverflow.Clip
+        )
+
+        if(message.mediaUri != null){
+            val mimeType = message.mediaMimeType
+            if (mimeType != null){
+                if (mimeType.contains("image")){
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(message.mediaUri)
+                            .build(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .height(250.dp)
+                            .padding(10.dp),
+                    )
+                } else if (mimeType.contains("video")){
+                        VideoMessagePreview(
+                            videoUri = message.mediaUri,
+                            onClick = { onVideoClicked(message.mediaUri) }
+                        )
+                } else {
+                    Box(modifier = Modifier.height(250.dp)){
+                        Text("Unsupported media Type")
                     }
                 }
-            },
-        onTextLayout = {layoutResult = it},
-        style = MaterialTheme.typography.bodyLarge.copy(
-            color = LocalContentColor.current,
-            fontSize = 16.sp
-        ),
-        maxLines = Int.MAX_VALUE,
-        overflow = TextOverflow.Clip
-    )
+            } else {
+                Box(modifier = Modifier.height(250.dp)){
+                    Text("No mimeType associated")
+                }
+            }
+        }
 
+    }
 }
 
+@Composable
+private fun VideoMessagePreview(videoUri: String, onClick: () -> Unit) {
+    val context = LocalContext.current.applicationContext
 
+    // Running on an IO thread for loading metadata from remote urls to reduce lag time
+    val bitmapState = produceState<Bitmap?>(initialValue = null) {
+        withContext(Dispatchers.IO) {
+            val mediaMetadataRetriever = MediaMetadataRetriever()
+
+            // Remote url
+            if (videoUri.contains("https://")) {
+                mediaMetadataRetriever.setDataSource(videoUri, HashMap<String, String>())
+            } else { // Locally saved files
+                mediaMetadataRetriever.setDataSource(context, Uri.parse(videoUri))
+            }
+            // Return any frame that the framework considers representative of a valid frame
+            value = mediaMetadataRetriever.frameAtTime
+        }
+    }
+
+    bitmapState.value?.let { bitmap ->
+        Box(
+            modifier = Modifier
+                .clickable(onClick = onClick)
+                .padding(10.dp),
+        ) {
+            Image(
+                bitmap = bitmap.asImageBitmap(),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(Color.Gray, BlendMode.Darken),
+            )
+
+            Icon(
+                Icons.Filled.PlayArrow,
+                tint = Color.White,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(50.dp)
+                    .align(Alignment.Center)
+                    .border(3.dp, Color.White, shape = CircleShape),
+            )
+        }
+    }
+}
 
 @Composable
-fun DayHeader(dayString: String) {
+private fun DayHeader(dayString: String) {
     Row(
         modifier = Modifier
             .padding(vertical = 8.dp, horizontal = 16.dp)
