@@ -14,7 +14,7 @@ data object PhotoPicker: NavKey
 @Serializable
 data class CameraScreen(val user: User) : NavKey
 @Serializable
-data object DemoScreen: NavKey
+data class VideoPlayer(val uri: String) : NavKey
 @Serializable
 data class VideoEditor(val user: User, val uri: String) : NavKey
 @Serializable
