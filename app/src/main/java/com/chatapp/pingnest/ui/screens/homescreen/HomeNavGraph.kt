@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 
 package com.chatapp.pingnest.ui.screens.homescreen
 
@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Message
@@ -15,15 +16,18 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FlexibleBottomAppBar
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ShortNavigationBarItem
+import androidx.compose.material3.ShortNavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -91,9 +95,9 @@ fun HomeNavGraph(
             )
         },
         bottomBar = {
-            NavigationBar (
+            FlexibleBottomAppBar(
                 windowInsets = WindowInsets.displayCutout,
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
             ) {
                 bottomBarItems.forEach { screen ->
                     val isSelected = currentScreen == screen
@@ -104,10 +108,10 @@ fun HomeNavGraph(
                                 badge = {
                                     if (screen == NavigationBarItem.ChatList){
                                         if (screen.badgeCount != null){
-                                        Badge(
-                                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                        ) {
+                                            Badge(
+                                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                            ) {
 
                                                 Text("${screen.badgeCount}")
                                             }
@@ -118,7 +122,9 @@ fun HomeNavGraph(
                             ) { Icon(
                                 painter = if (isSelected) painterResource( screen.selectedIcon) else painterResource(screen.unSelectedIcon),
                                 contentDescription = null,
-                                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(.7f)
+                                modifier = Modifier.size(24.dp),
+                                tint = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
+                                else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             }
 
@@ -127,8 +133,8 @@ fun HomeNavGraph(
                         label = {
                             Text(
                                 text = screen.title,
-                                color = if (isSelected) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurface.copy(.7f),
+                                color = if (isSelected) MaterialTheme.colorScheme.secondary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight = FontWeight.Bold
                             )
                         },
@@ -142,25 +148,28 @@ fun HomeNavGraph(
                             }
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = MaterialTheme.colorScheme.primary.copy(.3f),
+                            indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
                         )
+
                     )
+
                 }
             }
+
 
         },
         floatingActionButton = {
             if (currentScreen == NavigationBarItem.ChatList){
                 FloatingActionButton(
                     onClick = {popUp = !popUp},
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.Message,
-                        contentDescription = null
-                    )
-                }
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary
+                ) { Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.Message,
+                    contentDescription = null,
+                    modifier = Modifier
+                )}
+
             }
 
         }
