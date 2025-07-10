@@ -77,7 +77,8 @@ fun Bubble(user: User,sender: String, messages: List<ChatMessage>, onSend: ()-> 
         onMessageChange = onMessageChange,
         onPhotoPickerClicked = { },
         onCameraClicked = {},
-        viewModel = chatRoomViewmodel
+        viewModel = chatRoomViewmodel,
+        onVideoClicked = {}
     )
 
 }
