@@ -30,13 +30,13 @@ fun ProfileIcon(size: Dp, name: String, modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .then(modifier)  // Apply custom modifier first
-            .background(backgroundColor, CircleShape)  // Apply background with shape first
+            .background(backgroundColor.copy(.3f), CircleShape)  // Apply background with shape first
             .clip(CircleShape)
             .size(size),  // Then clip to ensure perfect circle
     ) {
         Text(
             text = initials.uppercase(),
-            color = Color.White,
+            color = backgroundColor,
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontSize = fontSize
             ),
